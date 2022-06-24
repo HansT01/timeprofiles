@@ -1,5 +1,6 @@
 from functools import wraps
 import inspect
+import sys
 from time import perf_counter
 from typing import Dict, Any, Callable
 from tabulate import tabulate
@@ -8,13 +9,14 @@ from operator import itemgetter
 
 class TimeProfiler:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
-    
+
     profiles = {}
 
     ORDER_BY_NAME = 0
     ORDER_BY_CALLS = 1
     ORDER_BY_AVERAGE = 2
     ORDER_BY_LONGEST = 3
+    ORDER_BY_TOTAL_ELAPSED = 4
 
     @staticmethod
     def reset():
@@ -24,16 +26,17 @@ class TimeProfiler:
     @staticmethod
     def profile_method(f):
         """Method decorator that adds the decorated method to the list of time profiles."""
+
         @wraps(f)
         def wrapper(*args, **kwargs):
             start = perf_counter()
             result = f(*args, **kwargs)
             end = perf_counter()
 
-            times = TimeProfiler.profiles
-            if f not in times:
-                times[f] = []
-            times[f] += [(end - start) * 1000]
+            profiles = TimeProfiler.profiles
+            if f not in profiles:
+                profiles[f] = []
+            profiles[f] += [(start, end)]
 
             return result
 
@@ -65,18 +68,29 @@ class TimeProfiler:
 
             longest = 0
             sum = 0
-            for val in times[key]:
-                sum += val
-                if val > longest:
-                    longest = val
+
+            earliest = sys.maxsize
+            latest = 0
+
+            for start, end in times[key]:
+                elapsed = end - start
+                sum += elapsed
+                if elapsed > longest:
+                    longest = elapsed
+                if start < earliest:
+                    earliest = start
+                if end > latest:
+                    latest = end
 
             calls = len(times[key])
             avg = sum / calls
+            total = latest - earliest
 
             row += [key.__name__]
             row += [calls]
-            row += [round(avg, 2)]
-            row += [round(longest, 2)]
+            row += [round(avg * 1000, 2)]
+            row += [round(longest * 1000, 2)]
+            row += [round(total * 1000, 2)]
 
             table += [row]
 
@@ -88,7 +102,13 @@ class TimeProfiler:
         print(
             tabulate(
                 table,
-                headers=["Name", "Calls", "Average (ms)", "Longest (ms)"],
+                headers=[
+                    "Name",
+                    "Calls",
+                    "Average (ms)",
+                    "Longest (ms)",
+                    "Total elapsed (ms)",
+                ],
                 floatfmt=",.2f",
             )
         )
@@ -115,6 +135,8 @@ if __name__ == "__main__":
     for _ in range(0, 5):
         ExampleClass.function_a()
         calc.function_b()
+
+    for _ in range(0, 5):
         calc.function_c()
 
-    TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
+    TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_TOTAL_ELAPSED)
