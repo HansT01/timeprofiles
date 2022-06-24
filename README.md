@@ -1,6 +1,6 @@
 # Simple Time Profiler
 TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table.
-The TimeProfiler class provides two static decorator methods for profiling, one for profiling the entire class, and one for profiling a single method.
+The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling a single method.
 
 ```python
 @TimeProfiler.profile_class_methods
