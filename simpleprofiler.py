@@ -8,7 +8,8 @@ from operator import itemgetter
 
 class TimeProfiler:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
-    times = {}
+    
+    profiles = {}
 
     ORDER_BY_NAME = 0
     ORDER_BY_CALLS = 1
@@ -16,9 +17,9 @@ class TimeProfiler:
     ORDER_BY_LONGEST = 3
 
     @staticmethod
-    def reset_times():
-        """Resets all time profiles."""
-        TimeProfiler.times = {}
+    def reset():
+        """Resets all profiles."""
+        TimeProfiler.profiles = {}
 
     @staticmethod
     def profile_method(f):
@@ -29,7 +30,7 @@ class TimeProfiler:
             result = f(*args, **kwargs)
             end = perf_counter()
 
-            times = TimeProfiler.times
+            times = TimeProfiler.profiles
             if f not in times:
                 times[f] = []
             times[f] += [(end - start) * 1000]
@@ -38,14 +39,26 @@ class TimeProfiler:
 
         return wrapper
 
+    # https://stackoverflow.com/questions/3467526/attaching-a-decorator-to-all-functions-within-a-class/3467879#3467879
     @staticmethod
-    def get_profiles(order_by: int = 0):
+    def profile_class_methods(cls):
+        """Class decorator for adding profile_method to all contained methods within the class."""
+        for name, method in inspect.getmembers(cls):
+            if (
+                not inspect.ismethod(method) and not inspect.isfunction(method)
+            ) or inspect.isbuiltin(method):
+                continue
+            setattr(cls, name, TimeProfiler.profile_method(method))
+        return cls
+
+    @staticmethod
+    def display_profiles(order_by: int = 0):
         """Prints out all profiles to console as a table, ordered by the order_by parameter.
 
         Args:
             order_by (int, optional): Optional ordering using provided ORDER_BY_ fields. Defaults to ORDER_BY_NAME.
         """
-        times: Dict[Callable, Any] = TimeProfiler.times
+        times: Dict[Callable, Any] = TimeProfiler.profiles
         table = []
         for key in times:
             row = []
@@ -80,18 +93,6 @@ class TimeProfiler:
             )
         )
 
-    # https://stackoverflow.com/questions/3467526/attaching-a-decorator-to-all-functions-within-a-class/3467879#3467879
-    @staticmethod
-    def profile_class_methods(cls):
-        """Class decorator for adding profile_method to all contained methods within the class."""
-        for name, method in inspect.getmembers(cls):
-            if (
-                not inspect.ismethod(method) and not inspect.isfunction(method)
-            ) or inspect.isbuiltin(method):
-                continue
-            setattr(cls, name, TimeProfiler.profile_method(method))
-        return cls
-
 
 if __name__ == "__main__":
 
@@ -116,4 +117,4 @@ if __name__ == "__main__":
         calc.function_b()
         calc.function_c()
 
-    TimeProfiler.get_profiles(TimeProfiler.ORDER_BY_NAME)
+    TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
