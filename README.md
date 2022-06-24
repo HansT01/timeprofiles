@@ -10,11 +10,11 @@ The TimeProfiler class provides two static decorator methods for profiling, one 
 The display_profiles static method can then be called to display all time profiles, ordered by a specified column.
 
 ```
-Name          Calls    Average (ms)    Longest (ms)
-----------  -------  --------------  --------------
-function_a        5           69.62           93.37
-function_b        5           61.61           77.92
-function_c        5           43.74           62.15
+Name        Calls    Average (ms)    Longest (ms)    Total elapsed (ms)
+--------  -------  --------------  --------------  --------------------
+method_a        5           45.41           71.97                453.34
+method_b        5           57.92           94.26                464.53
+method_c        5           52.49           76.91                262.49
 ```
 
 # Example usages

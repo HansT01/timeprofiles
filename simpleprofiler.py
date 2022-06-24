@@ -122,21 +122,21 @@ if __name__ == "__main__":
     @TimeProfiler.profile_class_methods
     class ExampleClass:
         @staticmethod
-        def function_a():
+        def method_a():
             sleep(randint(0, 1000) / 10000)
 
-        def function_b(self):
+        def method_b(self):
             sleep(randint(0, 1000) / 10000)
 
-        def function_c(self):
+        def method_c(self):
             sleep(randint(0, 1000) / 10000)
 
     calc = ExampleClass()
     for _ in range(0, 5):
-        ExampleClass.function_a()
-        calc.function_b()
+        ExampleClass.method_a()
+        calc.method_b()
 
     for _ in range(0, 5):
-        calc.function_c()
+        calc.method_c()
 
-    TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_TOTAL_ELAPSED)
+    TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
