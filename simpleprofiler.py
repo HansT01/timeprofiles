@@ -7,6 +7,7 @@ from operator import itemgetter
 
 
 class TimeProfiler:
+    """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
     times = {}
 
     ORDER_BY_NAME = 0
@@ -16,10 +17,12 @@ class TimeProfiler:
 
     @staticmethod
     def reset_times():
+        """Resets all time profiles."""
         TimeProfiler.times = {}
 
     @staticmethod
     def profile_method(f):
+        """Method decorator that adds the decorated method to the list of time profiles."""
         @wraps(f)
         def wrapper(*args, **kwargs):
             start = perf_counter()
@@ -37,6 +40,11 @@ class TimeProfiler:
 
     @staticmethod
     def get_profiles(order_by: int = 0):
+        """Prints out all profiles to console as a table, ordered by the order_by parameter.
+
+        Args:
+            order_by (int, optional): Optional ordering using provided ORDER_BY_ fields. Defaults to ORDER_BY_NAME.
+        """
         times: Dict[Callable, Any] = TimeProfiler.times
         table = []
         for key in times:
@@ -59,7 +67,7 @@ class TimeProfiler:
 
             table += [row]
 
-        if order_by == 0:
+        if order_by == TimeProfiler.ORDER_BY_NAME:
             table.sort(key=itemgetter(order_by))
         else:
             table.sort(key=itemgetter(order_by), reverse=True)
@@ -75,6 +83,7 @@ class TimeProfiler:
     # https://stackoverflow.com/questions/3467526/attaching-a-decorator-to-all-functions-within-a-class/3467879#3467879
     @staticmethod
     def profile_class_methods(cls):
+        """Class decorator for adding profile_method to all contained methods within the class."""
         for name, method in inspect.getmembers(cls):
             if (
                 not inspect.ismethod(method) and not inspect.isfunction(method)
@@ -92,7 +101,7 @@ if __name__ == "__main__":
     @TimeProfiler.profile_class_methods
     class ExampleClass:
         @staticmethod
-        def function_a(self):
+        def function_a():
             sleep(randint(0, 1000) / 10000)
 
         def function_b(self):
@@ -103,7 +112,7 @@ if __name__ == "__main__":
 
     calc = ExampleClass()
     for _ in range(0, 5):
-        calc.function_a()
+        ExampleClass.function_a()
         calc.function_b()
         calc.function_c()
 
