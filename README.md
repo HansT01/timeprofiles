@@ -1,6 +1,8 @@
 # Simple Time Profiler
 
-TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table. It is designed to assist in quickly debugging bottlenecks in both single-threaded and multi-threaded operations. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling a single method.
+TimeProfiler is designed to assist in quickly debugging bottlenecks in both single-threaded and multi-threaded operations. 
+
+It is a class for quickly storing the time taken for each method to complete, and displaying it as either a table or a plot. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling a single method.
 
 ```python
 @TimeProfiler.profile_class_methods
@@ -66,7 +68,7 @@ TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=Fa
 TimeProfiler.plot_profiles(fc="yellow", ec="black")
 ```
 
-# WIP Shorthand Function
+# WIP shorthand function
 
 Instead of writing the class and method name for each decorator, the **use_profiler** decorator can be used as a shorthand decorator for both classes and functions. This has not been properly tested and may not function as expected.
 
