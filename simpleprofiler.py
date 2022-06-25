@@ -162,20 +162,20 @@ class TimeProfiler:
 
     @staticmethod
     def __plot_data(
-        data: Dict[Callable, List[Tuple[float, float]]], ymin: float, ymax: float
+        data: Dict[Callable, List[Tuple[float, float]]], xmin: float, xmax: float
     ):
         fig, ax = plt.subplots()
         width = 1
 
-        ax.set_ylim(ymin, ymax)
+        ax.set_xlim(xmin, xmax)
 
         for i, pair in enumerate(data.items()):
             for value in pair[1]:
-                y0, y1 = value
-                ax.axvspan(xmin=i - width / 2, xmax=i + width / 2, ymin=y0, ymax=y1)
+                x0, x1 = value
+                ax.axhspan(ymin=i - width / 2, ymax=i + width / 2, xmin=x0, xmax=x1)
 
-        ax.set_xticks(np.arange(0, len(data)))
-        ax.set_xticklabels(data.keys())
+        ax.set_yticks(np.arange(0, len(data)))
+        ax.set_yticklabels(data.keys())
         plt.show()
 
 
