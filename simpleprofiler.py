@@ -149,10 +149,7 @@ class TimeProfiler:
         return earliest, latest
 
     @staticmethod
-    def __squash_profiles(
-        earliest: float,
-        latest: float,
-    ) -> Dict[str, List[Tuple[float, float]]]:
+    def __squash_profiles(earliest: float, latest: float):
         """Prepares the profiles to be read by __plot_data.
 
         Args:
@@ -160,23 +157,22 @@ class TimeProfiler:
             latest (float): Ending time
 
         Returns:
-            Dict[str, List[Tuple[float, float]]]: Data object
+            Dict[Callable, List[Tuple[float, float]]]: Data object
         """
 
         profiles = TimeProfiler.profiles
-        new_profiles: Dict[str, List[Tuple[float, float]]] = {}
+        new_profiles: Dict[Callable, List[Tuple[float, float]]] = {}
         time_frame = latest - earliest
 
         # Fill in new_profiles with normalized times
         for key in profiles:
-            new_key = key.__name__
-            if new_key not in new_profiles:
-                new_profiles[new_key] = []
+            if key not in new_profiles:
+                new_profiles[key] = []
 
             for start, end in profiles[key]:
                 new_start = (start - earliest) / time_frame
                 new_end = (end - earliest) / time_frame
-                new_profiles[new_key] += [(new_start, new_end)]
+                new_profiles[key] += [(new_start, new_end)]
 
         return new_profiles
 
@@ -205,6 +201,7 @@ class TimeProfiler:
         data: Dict[Callable, List[Tuple[float, float]]],
         xmin: float,
         xmax: float,
+        full_name=False,
         alpha=0.4,
         fc="#000",
         ec="#000",
@@ -216,6 +213,7 @@ class TimeProfiler:
             data (Dict[Callable, List[Tuple[float, float]]]): Data object
             xmin (float): lower x limit
             xmax (float): upper x limit
+            full_name (bool, optional): Display full name of methods? Defaults to False.
             **kwargs: ~matplotlib.patches.Polygon properties
         """
         fig, ax = plt.subplots()
@@ -238,7 +236,9 @@ class TimeProfiler:
                 )
 
         ax.set_yticks(np.arange(0, len(data)))
-        ax.set_yticklabels(data.keys())
+        ax.set_yticklabels(
+            [key.__qualname__ if full_name else key.__name__ for key in data.keys()]
+        )
 
         ax.set_title("Time profile ranges")
         ax.set_xlabel("Time elapsed (s)")

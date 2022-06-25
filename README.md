@@ -59,7 +59,3 @@ After adding the decorators and calling the methods, the **display_profiles** or
 TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=False, full_name=False)
 TimeProfiler.plot_profiles(fc="yellow", ec="black")
 ```
-
-# Known issues
-
-- **plot_profiles** will merge methods with the same **\_\_name\_\_** attribute, regardless of the parent class and method signature.
