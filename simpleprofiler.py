@@ -257,13 +257,11 @@ if __name__ == "__main__":
                 # Run method b as threads
                 fs = (executor.submit(self.method_b) for _ in range(0, num))
 
-                # Run method c
-                for _ in range(0, num):
-                    self.method_c()
-
                 # Wait for all futures to complete
                 for f in concurrent.futures.as_completed(fs):
                     pass
+
+            self.method_d()
 
         def method_b(self):
             sleep(randint(0, 10000) / 10000)
@@ -272,7 +270,11 @@ if __name__ == "__main__":
         def method_c(self):
             sleep(randint(0, 10000) / 10000)
 
+        def method_d(self):
+            sleep(randint(0, 10000) / 10000)
+
     calc = ExampleClass()
+
     calc.method_a(5)
 
     TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)

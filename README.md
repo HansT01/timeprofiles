@@ -10,11 +10,12 @@ The TimeProfiler class provides two static decorator methods for profiling: one 
 The **display_profiles** static method is used to display all time profiles, ordered by a specified column.
 
 ```
-Name        Calls    Average (ms)    Longest (ms)    Total elapsed (ms)
---------  -------  --------------  --------------  --------------------
-method_a        5           50.76          107.96                502.00
-method_b       10           52.78           93.93                758.04
-method_c        5          111.80          155.61                559.05
+Name        Calls    Average (ms)    Longest (ms)    Bottleneck (ms)
+--------  -------  --------------  --------------  -----------------
+method_a        1        1,504.80        1,504.80           1,504.80
+method_b        5        1,027.98        1,456.32           1,456.32
+method_c        5          436.64          757.97           1,115.18
+method_d        1           45.95           45.95              45.95
 ```
 
 The **plot_profiles** static method is used to plot all time profiles as ranges, ordered by earliest method call.
@@ -56,5 +57,5 @@ After adding the decorators and calling the methods, the **display_profiles** or
 
 ```python
 TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=True)
-TimeProfiler.plot_profiles(reverse=True)
+TimeProfiler.plot_profiles(fc="yellow", ec="black")
 ```
