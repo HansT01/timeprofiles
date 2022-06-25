@@ -1,10 +1,8 @@
 from functools import wraps
 import inspect
-import sys
 from time import perf_counter
 from typing import Any, Dict, Callable, List, Tuple
 from matplotlib import pyplot as plt
-from matplotlib.cbook import flatten
 import numpy as np
 import numpy.typing as npt
 from tabulate import tabulate
