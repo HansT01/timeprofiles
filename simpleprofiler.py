@@ -31,23 +31,26 @@ class TimeProfiler:
 
         @wraps(f)
         def wrapper(*args, **kwargs):
-            start = perf_counter()
-            result = f(*args, **kwargs)
-            end = perf_counter()
-
             profiles = TimeProfiler.profiles
             if f not in profiles:
                 profiles[f] = []
-            profiles[f] += [(start, end)]
 
+            # List used over tuples to guarantee call order
+            pair = [None, None]
+            profiles[f] += [pair]
+
+            pair[0] = perf_counter()
+            result = f(*args, **kwargs)
+            pair[1] = perf_counter()
             return result
 
         return wrapper
 
-    # https://stackoverflow.com/questions/3467526/attaching-a-decorator-to-all-functions-within-a-class/3467879#3467879
     @staticmethod
     def profile_class_methods(cls):
         """Class decorator for adding profile_method to all contained methods within the class."""
+
+        # https://stackoverflow.com/a/57368193
         for name, method in inspect.getmembers(cls):
             if (
                 not inspect.ismethod(method) and not inspect.isfunction(method)
@@ -79,20 +82,16 @@ class TimeProfiler:
                 sum += elapsed
                 if elapsed > longest:
                     longest = elapsed
-                if start < earliest:
-                    earliest = start
-                if end > latest:
-                    latest = end
 
             calls = len(profiles[key])
             avg = sum / calls
-            total = latest - earliest
+            bottleneck = TimeProfiler.__calculate_bottleneck(profiles[key])
 
             row += [key.__name__]
             row += [calls]
             row += [round(avg * 1000, 2)]
             row += [round(longest * 1000, 2)]
-            row += [round(total * 1000, 2)]
+            row += [round(bottleneck * 1000, 2)]
 
             table += [row]
 
@@ -106,19 +105,19 @@ class TimeProfiler:
                     "Calls",
                     "Average (ms)",
                     "Longest (ms)",
-                    "Total elapsed (ms)",
+                    "Bottleneck (ms)",
                 ],
                 floatfmt=",.2f",
             )
         )
 
     @staticmethod
-    def plot_profiles(reverse=False, alpha=0.4):
+    def plot_profiles(reverse=False, **kwargs):
         """Plots the profiles as a range bar chart, ordered by first call.
 
         Args:
             reverse (bool, optional): Reverse order? Defaults to False.
-            alpha (float, optional): Opacity of overlapping ranges. Defaults to 0.4.
+            **kwargs: ~matplotlib.patches.Polygon properties
         """
         earliest, latest = TimeProfiler.__get_time_range()
         new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
@@ -127,7 +126,7 @@ class TimeProfiler:
         sorted_profiles = dict(
             sorted(new_profiles.items(), key=lambda item: item[1], reverse=reverse)
         )
-        TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest, alpha)
+        TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest, **kwargs)
 
     @staticmethod
     def __get_time_range() -> Tuple[float, float]:
@@ -183,11 +182,34 @@ class TimeProfiler:
         return new_profiles
 
     @staticmethod
+    def __calculate_bottleneck(profile: List[Tuple[float, float]]) -> float:
+        n = len(profile)
+
+        starts: List[float] = []
+        ends: List[float] = []
+        for start, end in profile:
+            starts += [start]
+            ends += [end]
+        starts.sort()
+        ends.sort()
+
+        bottleneck = 0
+        j = 0
+        for i in range(0, n):
+            if i == n - 1 or starts[i + 1] > ends[i]:
+                bottleneck += ends[i] - starts[j]
+                j = i + 1
+        return bottleneck
+
+    @staticmethod
     def __plot_data(
         data: Dict[Callable, List[Tuple[float, float]]],
         xmin: float,
         xmax: float,
-        alpha: float,
+        alpha=0.4,
+        fc="#000",
+        ec="#000",
+        **kwargs
     ):
         """Plots the data using the matplotlib library.
 
@@ -195,7 +217,7 @@ class TimeProfiler:
             data (Dict[Callable, List[Tuple[float, float]]]): Data object
             xmin (float): lower x limit
             xmax (float): upper x limit
-            alpha (float): opacity of overlapping ranges, from 0 to 1
+            **kwargs: ~matplotlib.patches.Polygon properties
         """
         fig, ax = plt.subplots()
         width = 1
@@ -211,6 +233,9 @@ class TimeProfiler:
                     xmin=x0,
                     xmax=x1,
                     alpha=alpha,
+                    fc=fc,
+                    ec=ec,
+                    **kwargs,
                 )
 
         ax.set_yticks(np.arange(0, len(data)))
@@ -226,27 +251,33 @@ class TimeProfiler:
 if __name__ == "__main__":
     from random import randint
     from time import sleep
+    import concurrent.futures
 
     @TimeProfiler.profile_class_methods
     class ExampleClass:
-        @staticmethod
-        def method_a():
-            sleep(randint(0, 1000) / 10000)
+        def method_a(self, num):
+            with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+                fs = (executor.submit(self.method_b) for _ in range(0, num))
+                for f in concurrent.futures.as_completed(fs):
+                    pass
 
         def method_b(self):
-            sleep(randint(0, 1000) / 10000)
+            sleep(randint(0, 10000) / 10000)
+            self.method_c()
 
         def method_c(self):
-            sleep(randint(0, 2000) / 10000)
+            sleep(randint(0, 10000) / 10000)
+
+        def method_d(self):
+            sleep(randint(0, 10000) / 10000)
 
     calc = ExampleClass()
 
-    for _ in range(0, 5):
-        ExampleClass.method_a()
-        calc.method_b()
+    # calc.method_a(10)
 
     for _ in range(0, 5):
-        calc.method_b()
+        calc.method_c()
+        calc.method_d()
 
     for _ in range(0, 5):
         calc.method_c()
