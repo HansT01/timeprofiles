@@ -4,6 +4,7 @@ import sys
 from time import perf_counter
 from typing import Any, Dict, Callable, List, Tuple
 from matplotlib import pyplot as plt
+from matplotlib.cbook import flatten
 import numpy as np
 from tabulate import tabulate
 from operator import itemgetter
@@ -132,19 +133,8 @@ class TimeProfiler:
         Returns:
             Tuple[float, float]: earliest time (s), latest time (s)
         """
-        profiles = TimeProfiler.profiles
-
-        # Get earliest and latest times
-        earliest = sys.maxsize
-        latest = 0
-        for key in profiles:
-            for start, end in profiles[key]:
-                if start < earliest:
-                    earliest = start
-                if end > latest:
-                    latest = end
-
-        return earliest, latest
+        vals = list(flatten(TimeProfiler.profiles.values()))
+        return min(vals), max(vals)
 
     @staticmethod
     def __squash_profiles(earliest: float, latest: float):
