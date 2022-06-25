@@ -175,10 +175,17 @@ class TimeProfiler:
         for i, pair in enumerate(data.items()):
             for value in pair[1]:
                 x0, x1 = value
-                ax.axhspan(ymin=i - width / 2, ymax=i + width / 2, xmin=x0, xmax=x1)
+                ax.axhspan(
+                    ymin=i - width / 2, ymax=i + width / 2, xmin=x0, xmax=x1, alpha=0.2
+                )
 
         ax.set_yticks(np.arange(0, len(data)))
         ax.set_yticklabels(data.keys())
+
+        ax.set_title("Time profile ranges")
+        ax.set_xlabel("Time elapsed (s)")
+
+        plt.tight_layout()
         plt.show()
 
 
@@ -188,11 +195,11 @@ if __name__ == "__main__":
 
     @TimeProfiler.profile_class_methods
     class ExampleClass:
-        def method_b(self):
-            sleep(randint(0, 1000) / 10000)
-
         @staticmethod
         def method_a():
+            sleep(randint(0, 1000) / 10000)
+
+        def method_b(self):
             sleep(randint(0, 1000) / 10000)
 
         def method_c(self):
@@ -201,14 +208,14 @@ if __name__ == "__main__":
     calc = ExampleClass()
 
     for _ in range(0, 5):
-        calc.method_c()
-
-    for _ in range(0, 5):
         ExampleClass.method_a()
         calc.method_b()
 
     for _ in range(0, 5):
         calc.method_b()
+
+    for _ in range(0, 5):
+        calc.method_c()
 
     TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
     TimeProfiler.plot_profiles()
