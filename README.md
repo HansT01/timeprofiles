@@ -56,6 +56,6 @@ class ExampleClass:
 After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** static methods can be called to visualize the time profiles for each method.
 
 ```python
-TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=False, full_name=False)
+TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=False, full_name=True)
 TimeProfiler.plot_profiles(fc="yellow", ec="black")
 ```
