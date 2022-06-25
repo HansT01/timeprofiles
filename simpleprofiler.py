@@ -57,7 +57,7 @@ class TimeProfiler:
         return cls
 
     @staticmethod
-    def display_profiles(order_by: int = 0):
+    def display_profiles(order_by=0, reverse=False):
         """Prints out all profiles to console as a table, ordered by the order_by parameter.
 
         Args:
@@ -96,10 +96,7 @@ class TimeProfiler:
 
             table += [row]
 
-        if order_by == TimeProfiler.ORDER_BY_NAME:
-            table.sort(key=itemgetter(order_by))
-        else:
-            table.sort(key=itemgetter(order_by), reverse=True)
+        table.sort(key=itemgetter(order_by), reverse=reverse)
 
         print(
             tabulate(
@@ -116,13 +113,15 @@ class TimeProfiler:
         )
 
     @staticmethod
-    def plot_profiles():
+    def plot_profiles(reverse=False, alpha=0.4):
         earliest, latest = TimeProfiler.__get_time_range()
         new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
 
         # Sort by first 'start' time
-        sorted_profiles = dict(sorted(new_profiles.items(), key=lambda item: item[1]))
-        TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest)
+        sorted_profiles = dict(
+            sorted(new_profiles.items(), key=lambda item: item[1], reverse=reverse)
+        )
+        TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest, alpha)
 
     @staticmethod
     def __get_time_range() -> Tuple[float, float]:
@@ -165,7 +164,10 @@ class TimeProfiler:
 
     @staticmethod
     def __plot_data(
-        data: Dict[Callable, List[Tuple[float, float]]], xmin: float, xmax: float
+        data: Dict[Callable, List[Tuple[float, float]]],
+        xmin: float,
+        xmax: float,
+        alpha: float,
     ):
         fig, ax = plt.subplots()
         width = 1
@@ -176,7 +178,11 @@ class TimeProfiler:
             for value in pair[1]:
                 x0, x1 = value
                 ax.axhspan(
-                    ymin=i - width / 2, ymax=i + width / 2, xmin=x0, xmax=x1, alpha=0.2
+                    ymin=i - width / 2,
+                    ymax=i + width / 2,
+                    xmin=x0,
+                    xmax=x1,
+                    alpha=alpha,
                 )
 
         ax.set_yticks(np.arange(0, len(data)))
