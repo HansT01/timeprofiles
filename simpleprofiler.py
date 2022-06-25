@@ -6,6 +6,7 @@ from typing import Any, Dict, Callable, List, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.cbook import flatten
 import numpy as np
+import numpy.typing as npt
 from tabulate import tabulate
 from operator import itemgetter
 
@@ -14,6 +15,7 @@ class TimeProfiler:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
 
     profiles: Dict[Callable, List[Tuple[float, float]]] = {}
+    profiles_arr: Dict[Callable, npt.NDArray] = None
 
     ORDER_BY_NAME = 0
     ORDER_BY_CALLS = 1
@@ -69,20 +71,19 @@ class TimeProfiler:
             reverse (bool, optional): Reverse row order? Defaults to False.
             full_name (bool, optional): Display full name of methods? Defaults to False.
         """
-        profiles = TimeProfiler.profiles
+        TimeProfiler.__create_arr_profiles()
+        profiles_arr = TimeProfiler.profiles_arr
         table = []
-        for key in profiles:
-            profile = profiles[key]
-            n = len(profile)
+        for key in profiles_arr:
+            arr_profile = profiles_arr[key]
+            n = len(arr_profile)
 
-            start_arr = np.array([i[0] for i in profile])
-            end_arr = np.array([i[1] for i in profile])
-            elapsed_arr = end_arr - start_arr
+            elapsed_arr = arr_profile[1] - arr_profile[0]
             sum = np.sum(elapsed_arr)
             longest = elapsed_arr.max()
 
             avg = sum / n
-            bottleneck = TimeProfiler.__calculate_bottleneck(profile)
+            bottleneck = TimeProfiler.__calculate_bottleneck(arr_profile)
 
             row = [
                 key.__qualname__ if full_name else key.__name__,
@@ -118,6 +119,7 @@ class TimeProfiler:
             reverse (bool, optional): Reverse order? Defaults to False.
             **kwargs: ~matplotlib.patches.Polygon properties
         """
+        TimeProfiler.__create_arr_profiles()
         earliest, latest = TimeProfiler.__get_time_range()
         new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
 
@@ -128,14 +130,28 @@ class TimeProfiler:
         TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest, **kwargs)
 
     @staticmethod
+    def __create_arr_profiles():
+        profiles = TimeProfiler.profiles
+        profiles_arr = {}
+        for key in profiles:
+            profile = profiles[key]
+            n = len(profile)
+            profiles_arr[key] = np.array(
+                [[profile[j][i] for j in range(0, n)] for i in [0, 1]]
+            )
+        TimeProfiler.profiles_arr = profiles_arr
+
+    @staticmethod
     def __get_time_range() -> Tuple[float, float]:
         """Returns the time range across all profiles.
 
         Returns:
             Tuple[float, float]: earliest time (s), latest time (s)
         """
-        vals = list(flatten(TimeProfiler.profiles.values()))
-        return min(vals), max(vals)
+        profiles_arr = TimeProfiler.profiles_arr
+        earliest = min([profiles_arr[key].min() for key in profiles_arr])
+        latest = max([profiles_arr[key].max() for key in profiles_arr])
+        return earliest, latest
 
     @staticmethod
     def __squash_profiles(earliest: float, latest: float):
@@ -149,34 +165,28 @@ class TimeProfiler:
             Dict[Callable, List[Tuple[float, float]]]: Data object
         """
 
-        profiles = TimeProfiler.profiles
+        profiles_arr = TimeProfiler.profiles_arr
         new_profiles: Dict[Callable, List[Tuple[float, float]]] = {}
         time_frame = latest - earliest
 
         # Fill in new_profiles with normalized times
-        for key in profiles:
-            profile = profiles[key]
-            n = len(profile)
+        for key in profiles_arr:
+            arr_profile: npt.NDArray = profiles_arr[key]
+            n = arr_profile.shape[1]
 
-            starts = np.array([i[0] for i in profile])
-            ends = np.array([i[1] for i in profile])
-
-            new_starts = (starts - earliest) / time_frame
-            new_ends = (ends - earliest) / time_frame
+            new_starts = (arr_profile[0] - earliest) / time_frame
+            new_ends = (arr_profile[1] - earliest) / time_frame
 
             new_profiles[key] = [(new_starts[i], new_ends[i]) for i in range(0, n)]
 
         return new_profiles
 
     @staticmethod
-    def __calculate_bottleneck(profile: List[Tuple[float, float]]) -> float:
-        n = len(profile)
+    def __calculate_bottleneck(profile: npt.NDArray) -> float:
+        n = profile.shape[1]
 
-        starts = [i[0] for i in profile]
-        ends = [i[1] for i in profile]
-
-        starts.sort()
-        ends.sort()
+        starts = np.sort(profile[0])
+        ends = np.sort(profile[1])
 
         bottleneck = 0
         j = 0
