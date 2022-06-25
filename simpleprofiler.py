@@ -114,6 +114,12 @@ class TimeProfiler:
 
     @staticmethod
     def plot_profiles(reverse=False, alpha=0.4):
+        """Plots the profiles as a range bar chart, ordered by first call.
+
+        Args:
+            reverse (bool, optional): Reverse order? Defaults to False.
+            alpha (float, optional): Opacity of overlapping ranges. Defaults to 0.4.
+        """
         earliest, latest = TimeProfiler.__get_time_range()
         new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
 
