@@ -72,16 +72,17 @@ class TimeProfiler:
         profiles = TimeProfiler.profiles
         table = []
         for key in profiles:
-            n = len(profiles[key])
+            profile = profiles[key]
+            n = len(profile)
 
-            start_arr = np.array([i[0] for i in profiles[key]])
-            end_arr = np.array([i[1] for i in profiles[key]])
+            start_arr = np.array([i[0] for i in profile])
+            end_arr = np.array([i[1] for i in profile])
             elapsed_arr = end_arr - start_arr
             sum = np.sum(elapsed_arr)
             longest = elapsed_arr.max()
 
             avg = sum / n
-            bottleneck = TimeProfiler.__calculate_bottleneck(profiles[key])
+            bottleneck = TimeProfiler.__calculate_bottleneck(profile)
 
             row = [
                 key.__qualname__ if full_name else key.__name__,
@@ -160,8 +161,8 @@ class TimeProfiler:
             starts = np.array([i[0] for i in profile])
             ends = np.array([i[1] for i in profile])
 
-            new_starts = ((starts - earliest) / time_frame).tolist()
-            new_ends = ((ends - earliest) / time_frame).tolist()
+            new_starts = (starts - earliest) / time_frame
+            new_ends = (ends - earliest) / time_frame
 
             new_profiles[key] = [(new_starts[i], new_ends[i]) for i in range(0, n)]
 
