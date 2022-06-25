@@ -2,7 +2,7 @@ from functools import wraps
 import inspect
 import sys
 from time import perf_counter
-from typing import Dict, Any, Callable, List, Tuple
+from typing import Any, Dict, Callable, List, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 from tabulate import tabulate
@@ -119,7 +119,10 @@ class TimeProfiler:
     def plot_profiles():
         earliest, latest = TimeProfiler.__get_time_range()
         new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
-        TimeProfiler.__plot_data(new_profiles, 0, latest - earliest)
+
+        # Sort by first 'start' time
+        sorted_profiles = dict(sorted(new_profiles.items(), key=lambda item: item[1]))
+        TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest)
 
     @staticmethod
     def __get_time_range() -> Tuple[float, float]:
@@ -180,7 +183,6 @@ class TimeProfiler:
 
 
 if __name__ == "__main__":
-
     from random import randint
     from time import sleep
 
@@ -199,14 +201,14 @@ if __name__ == "__main__":
     calc = ExampleClass()
 
     for _ in range(0, 5):
+        calc.method_c()
+
+    for _ in range(0, 5):
         ExampleClass.method_a()
         calc.method_b()
 
     for _ in range(0, 5):
         calc.method_b()
-
-    for _ in range(0, 5):
-        calc.method_c()
 
     TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
     TimeProfiler.plot_profiles()
