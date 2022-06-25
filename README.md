@@ -12,12 +12,14 @@ The **display_profiles** static method can then be called to display all time pr
 ```
 Name        Calls    Average (ms)    Longest (ms)    Total elapsed (ms)
 --------  -------  --------------  --------------  --------------------
-method_a        5           45.41           71.97                453.34
-method_b        5           57.92           94.26                464.53
-method_c        5           52.49           76.91                262.49
+method_a        5           50.76          107.96                502.00
+method_b       10           52.78           93.93                758.04
+method_c        5          111.80          155.61                559.05
 ```
 
 The **plot_profiles** static method can then be called to plot all time profiles as ranges, ordered by earliest method call.
+
+![plot_profiles example figure](/assets/images/example_fig.png)
 
 # Example usages
 
