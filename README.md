@@ -24,7 +24,7 @@ The **plot_profiles** static method is used to plot all time profiles as ranges,
 
 # Example usages
 
-The **profile_method** decorator is to be applied on methods or functions.
+The **profile_method** decorator is applied on individual methods or functions.
 
 ```python
 from simpleprofiler import TimeProfiler
