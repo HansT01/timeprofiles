@@ -7,7 +7,7 @@ The TimeProfiler class provides two static decorator methods for profiling: one 
 @TimeProfiler.profile_method
 ```
 
-The **display_profiles** static method can then be called to display all time profiles, ordered by a specified column.
+The **display_profiles** static method is used to display all time profiles, ordered by a specified column.
 
 ```
 Name        Calls    Average (ms)    Longest (ms)    Total elapsed (ms)
@@ -17,7 +17,7 @@ method_b       10           52.78           93.93                758.04
 method_c        5          111.80          155.61                559.05
 ```
 
-The **plot_profiles** static method can then be called to plot all time profiles as ranges, ordered by earliest method call.
+The **plot_profiles** static method is used to plot all time profiles as ranges, ordered by earliest method call.
 
 ![plot_profiles example figure](/assets/images/example_fig.png)
 
