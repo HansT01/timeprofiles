@@ -23,16 +23,7 @@ The **plot_profiles** static method can then be called to plot all time profiles
 
 # Example usages
 
-```python
-from simpleprofiler import TimeProfiler
-
-@TimeProfiler.profile_class_methods
-class ExampleClass:
-    # Class content
-
-TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_AVERAGE)
-TimeProfiler.plot_profiles()
-```
+The **profile_method** decorator is to be applied on methods or functions.
 
 ```python
 from simpleprofiler import TimeProfiler
@@ -42,6 +33,28 @@ class ExampleClass:
     def my_method():
         # Method content
 
-TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_AVERAGE)
-TimeProfiler.plot_profiles()
+    @TimeProfiler.profile_method
+    def my_other_method():
+        # Method content
+```
+
+Alternatively, the **profile_class_methods** decorator can be used to apply the **profile_method** decorator on all class methods.
+
+```python
+from simpleprofiler import TimeProfiler
+
+@TimeProfiler.profile_class_methods
+class ExampleClass:
+    def my_method():
+        # Method content
+
+    def my_other_method():
+        # Method content
+```
+
+After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** static methods can be called to visualize the time profiles for each method.
+
+```python
+TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=True)
+TimeProfiler.plot_profiles(reverse=True)
 ```
