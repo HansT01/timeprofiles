@@ -125,6 +125,11 @@ class TimeProfiler:
 
     @staticmethod
     def __get_time_range() -> Tuple[float, float]:
+        """Returns the time range across all profiles.
+
+        Returns:
+            Tuple[float, float]: earliest time (s), latest time (s)
+        """
         profiles = TimeProfiler.profiles
 
         # Get earliest and latest times
@@ -144,6 +149,15 @@ class TimeProfiler:
         earliest: float,
         latest: float,
     ) -> Dict[str, List[Tuple[float, float]]]:
+        """Prepares the profiles to be read by __plot_data.
+
+        Args:
+            earliest (float): Starting time
+            latest (float): Ending time
+
+        Returns:
+            Dict[str, List[Tuple[float, float]]]: Data object
+        """
 
         profiles = TimeProfiler.profiles
         new_profiles: Dict[str, List[Tuple[float, float]]] = {}
@@ -169,6 +183,14 @@ class TimeProfiler:
         xmax: float,
         alpha: float,
     ):
+        """Plots the data using the matplotlib library.
+
+        Args:
+            data (Dict[Callable, List[Tuple[float, float]]]): Data object
+            xmin (float): lower x limit
+            xmax (float): upper x limit
+            alpha (float): opacity of overlapping ranges, from 0 to 1
+        """
         fig, ax = plt.subplots()
         width = 1
 
