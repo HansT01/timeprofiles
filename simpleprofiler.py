@@ -18,7 +18,7 @@ class TimeProfiler:
     ORDER_BY_CALLS = 1
     ORDER_BY_AVERAGE = 2
     ORDER_BY_LONGEST = 3
-    ORDER_BY_TOTAL_ELAPSED = 4
+    ORDER_BY_BOTTLENECK = 4
 
     @staticmethod
     def reset():
@@ -73,9 +73,6 @@ class TimeProfiler:
 
             longest = 0
             sum = 0
-
-            earliest = sys.maxsize
-            latest = 0
 
             for start, end in profiles[key]:
                 elapsed = end - start
@@ -257,7 +254,14 @@ if __name__ == "__main__":
     class ExampleClass:
         def method_a(self, num):
             with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+                # Run method b as threads
                 fs = (executor.submit(self.method_b) for _ in range(0, num))
+
+                # Run method c
+                for _ in range(0, num):
+                    self.method_c()
+
+                # Wait for all futures to complete
                 for f in concurrent.futures.as_completed(fs):
                     pass
 
@@ -268,19 +272,8 @@ if __name__ == "__main__":
         def method_c(self):
             sleep(randint(0, 10000) / 10000)
 
-        def method_d(self):
-            sleep(randint(0, 10000) / 10000)
-
     calc = ExampleClass()
-
-    # calc.method_a(10)
-
-    for _ in range(0, 5):
-        calc.method_c()
-        calc.method_d()
-
-    for _ in range(0, 5):
-        calc.method_c()
+    calc.method_a(5)
 
     TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
     TimeProfiler.plot_profiles()
