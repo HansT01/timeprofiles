@@ -53,9 +53,31 @@ class ExampleClass:
         # Method content
 ```
 
+Another way of using the profiling decorators is to apply it onto a class instance. In the following example, only the methods called from the object will be profiled.
+
+```python
+example_obj = TimeProfiler.profile_class_methods(ExampleClass())
+```
+
 After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** static methods can be called to visualize the time profiles for each method.
 
 ```python
 TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=False, full_name=True)
 TimeProfiler.plot_profiles(fc="yellow", ec="black")
+```
+
+# WIP Shorthand Function
+
+Instead of typing on the class and method name for each decorator, the **use_profiler** decorator can be called instead for both classes and functions. This may not function properly in all scenarios.
+
+```python
+from simpleprofiler import use_profiler
+
+@use_profiler
+class ExampleClass:
+    def my_method():
+        # Method content
+
+    def my_other_method():
+        # Method content
 ```
