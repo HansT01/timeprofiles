@@ -247,12 +247,23 @@ class TimeProfiler:
         plt.show()
 
 
+def use_profiler(instance: Any):
+    if inspect.ismethod(instance) or inspect.isfunction(instance):
+        return TimeProfiler.profile_method(instance)
+    else:
+        try:
+            return TimeProfiler.profile_class_methods(instance)
+        except:
+            print("Could not identify instance")
+            return instance
+
+
 if __name__ == "__main__":
     from random import randint
     from time import sleep
     import concurrent.futures
 
-    @TimeProfiler.profile_class_methods
+    @use_profiler
     class ExampleClass:
         def method_a(self, num):
             with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
@@ -275,9 +286,19 @@ if __name__ == "__main__":
         def method_d(self):
             sleep(randint(0, 10000) / 10000)
 
-    calc = ExampleClass()
+        @staticmethod
+        def method_e():
+            sleep(randint(0, 10000) / 10000)
 
-    calc.method_a(5)
+    example1 = ExampleClass()
+    example1.method_a(5)
+
+    example2 = ExampleClass()
+    example2.method_a(5)
+
+    ExampleClass.method_e()
+
+    example1.method_a(5)
 
     TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
     TimeProfiler.plot_profiles()
