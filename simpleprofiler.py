@@ -72,12 +72,13 @@ class TimeProfiler:
         table = []
         for key in profiles:
             n = len(profiles[key])
+
             start_arr = np.array([i[0] for i in profiles[key]])
             end_arr = np.array([i[1] for i in profiles[key]])
             elapsed_arr = end_arr - start_arr
-
             sum = np.sum(elapsed_arr)
             longest = elapsed_arr.max()
+
             avg = sum / n
             bottleneck = TimeProfiler.__calculate_bottleneck(profiles[key])
 
@@ -163,13 +164,16 @@ class TimeProfiler:
 
         # Fill in new_profiles with normalized times
         for key in profiles:
-            if key not in new_profiles:
-                new_profiles[key] = []
+            profile = profiles[key]
+            n = len(profile)
 
-            for start, end in profiles[key]:
-                new_start = (start - earliest) / time_frame
-                new_end = (end - earliest) / time_frame
-                new_profiles[key] += [(new_start, new_end)]
+            starts = np.array([i[0] for i in profile])
+            ends = np.array([i[1] for i in profile])
+
+            new_starts = ((starts - earliest) / time_frame).tolist()
+            new_ends = ((ends - earliest) / time_frame).tolist()
+
+            new_profiles[key] = [(new_starts[i], new_ends[i]) for i in range(0, n)]
 
         return new_profiles
 
@@ -177,11 +181,9 @@ class TimeProfiler:
     def __calculate_bottleneck(profile: List[Tuple[float, float]]) -> float:
         n = len(profile)
 
-        starts: List[float] = []
-        ends: List[float] = []
-        for start, end in profile:
-            starts += [start]
-            ends += [end]
+        starts = [i[0] for i in profile]
+        ends = [i[1] for i in profile]
+
         starts.sort()
         ends.sort()
 
@@ -291,3 +293,4 @@ if __name__ == "__main__":
     example1.method_a(5)
 
     TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
+    TimeProfiler.plot_profiles()
