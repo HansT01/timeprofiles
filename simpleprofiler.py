@@ -60,11 +60,13 @@ class TimeProfiler:
         return cls
 
     @staticmethod
-    def display_profiles(order_by=0, reverse=False):
+    def display_profiles(order_by=0, reverse=False, full_name=False):
         """Prints out all profiles to console as a table, ordered by the order_by parameter.
 
         Args:
             order_by (int, optional): Optional ordering using provided ORDER_BY_ fields. Defaults to ORDER_BY_NAME.
+            reverse (bool, optional): Reverse row order? Defaults to False.
+            full_name (bool, optional): Display full name of methods? Defaults to False.
         """
         profiles = TimeProfiler.profiles
         table = []
@@ -84,7 +86,7 @@ class TimeProfiler:
             avg = sum / calls
             bottleneck = TimeProfiler.__calculate_bottleneck(profiles[key])
 
-            row += [key.__name__]
+            row += [key.__qualname__ if full_name else key.__name__]
             row += [calls]
             row += [round(avg * 1000, 2)]
             row += [round(longest * 1000, 2)]
