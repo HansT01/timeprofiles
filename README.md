@@ -59,3 +59,8 @@ After adding the decorators and calling the methods, the **display_profiles** or
 TimeProfiler.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=True)
 TimeProfiler.plot_profiles(fc="yellow", ec="black")
 ```
+
+# Known issues
+
+- **display_profiles** will not display parent class of methods. 
+- **plot_profiles** will merge methods with the same **__name__** attribute, regardless of the parent class and method signature.
