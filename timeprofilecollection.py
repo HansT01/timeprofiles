@@ -15,12 +15,6 @@ class TimeProfileCollection:
 
     profiles: Dict[Callable, type[TimeProfile]] = {}
 
-    ORDER_BY_NAME = 0
-    ORDER_BY_CALLS = 1
-    ORDER_BY_AVERAGE = 2
-    ORDER_BY_LONGEST = 3
-    ORDER_BY_BOTTLENECK = 4
-
     @staticmethod
     def reset():
         """Resets all profiles."""
@@ -54,6 +48,12 @@ class TimeProfileCollection:
                 continue
             setattr(cls, name, TimeProfileCollection.profile_method(method))
         return cls
+
+    ORDER_BY_NAME = 0
+    ORDER_BY_CALLS = 1
+    ORDER_BY_AVERAGE = 2
+    ORDER_BY_LONGEST = 3
+    ORDER_BY_BOTTLENECK = 4
 
     @staticmethod
     def display_profiles(order_by=0, reverse=False, full_name=False):
@@ -107,7 +107,12 @@ class TimeProfileCollection:
         TimeProfileCollection.__plot_data(sorted_profiles, earliest, latest, **kwargs)
 
     @staticmethod
-    def __get_time_range():
+    def __get_time_range() -> tuple[float, float]:
+        """Gets the earliest and latest times for current profiles.
+
+        Returns:
+            tuple[float, float]: earliest and latest times in seconds
+        """
         profiles = TimeProfileCollection.profiles
         earliest = min([profile.min() for profile in profiles.values()])
         latest = max([profile.max() for profile in profiles.values()])
@@ -122,7 +127,7 @@ class TimeProfileCollection:
         alpha=0.4,
         fc="#000",
         ec="#000",
-        **kwargs
+        **kwargs,
     ):
         """Plots the data using the matplotlib library.
 
@@ -140,7 +145,7 @@ class TimeProfileCollection:
 
         for i, pair in enumerate(data.items()):
             starts_arr, ends_arr = pair[1].get_squashed_arr(earliest, latest)
-            for x0, x1 in zip(starts_arr.tolist(), ends_arr.tolist()):
+            for x0, x1 in zip(starts_arr, ends_arr):
                 ax.axhspan(
                     ymin=i - width / 2,
                     ymax=i + width / 2,
@@ -162,22 +167,14 @@ class TimeProfileCollection:
         plt.show()
 
 
-def use_profiler(instance: Any):
-    try:
-        if inspect.ismethod(instance) or inspect.isfunction(instance):
-            return TimeProfileCollection.profile_method(instance)
-        return TimeProfileCollection.profile_class_methods(instance)
-    except:
-        print("Could not identify instance")
-        return instance
-
-
 if __name__ == "__main__":
     from random import randint
     from time import sleep
     import concurrent.futures
 
-    @use_profiler
+    TPC = TimeProfileCollection
+
+    @TPC.profile_class_methods
     class ExampleClass:
         def method_a(self, num):
             with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
@@ -207,5 +204,5 @@ if __name__ == "__main__":
     example1 = ExampleClass()
     example1.method_a(5)
 
-    TimeProfileCollection.display_profiles(TimeProfileCollection.ORDER_BY_NAME)
-    TimeProfileCollection.plot_profiles()
+    TPC.display_profiles(TPC.ORDER_BY_NAME)
+    TPC.plot_profiles()
