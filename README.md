@@ -1,12 +1,12 @@
-# Simple Time Profiler
+# Python Time Profiler
 
-TimeProfiler is designed to assist in quickly debugging bottlenecks in both single-threaded and multi-threaded operations. 
+This library is designed to assist in quickly debugging bottlenecks in both single-threaded and multi-threaded operations. 
 
-It is a class for quickly storing the time taken for each method to complete, and displaying it as either a table or a plot. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling a single method.
+It contains a class called **TimeProfileCollection** for easily storing the time taken for each method to complete, and displaying it as either a table or a gantt chart. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling individual methods.
 
 ```python
-@TimeProfiler.profile_class_methods
-@TimeProfiler.profile_method
+@TimeProfileCollection.profile_class_methods
+@TimeProfileCollection.profile_method
 ```
 
 The **display_profiles** static method is used to display all time profiles, ordered by a specified column.
