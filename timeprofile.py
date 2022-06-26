@@ -19,8 +19,15 @@ class TimeProfile:
         if (bool(starts) != bool(ends)) or (starts and ends and len(starts) != len(ends)):
             raise Exception("Input lists do not have the same length")
 
-        self.__starts = [] if starts is None else starts
-        self.__ends = [] if ends is None else ends
+        if starts is None and ends is None:
+            self.__starts = []
+            self.__ends = []
+        else:
+            for i in range(len(starts)):
+                if ends[i] < starts[i]:
+                    raise Exception("End time must be after start time.")
+            self.__starts = starts
+            self.__ends = ends
 
         self.__starts_arr = None
         self.__ends_arr = None
@@ -29,6 +36,9 @@ class TimeProfile:
     def __len__(self) -> int:
         """Gets the number of elements in the profile object."""
         return len(self.__starts)
+
+    def __repr__(self):
+        return str([(start, end) for (start, end) in zip(self.__starts, self.__ends)])
 
     @property
     def profile(self) -> tuple[list[float], list[float]]:
@@ -58,14 +68,10 @@ class TimeProfile:
 
     def add(self, start: float, end: float):
         """Adds new start and end times to profile."""
+        if end < start:
+            raise Exception("End time must be after start time.")
         self.__starts += [start]
         self.__ends += [end]
-        self.__updated = False
-
-    def add(self, time_pair: tuple[float, float]):
-        """Adds new start and end times to profile."""
-        self.__starts += [time_pair[0]]
-        self.__ends += [time_pair[1]]
         self.__updated = False
 
     def clear(self):
