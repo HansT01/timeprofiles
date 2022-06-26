@@ -55,7 +55,7 @@ class ExampleClass:
         # Method content
 ```
 
-Another way of using the profiling decorators is to apply it directly onto a class object. In the following example, only the methods called from the example_object will be profiled.
+Another way of using the profiling decorators is to apply it directly onto an object. In the following example, only the methods called from the example_object will be profiled. Keep in mind that this excludes the **__init__** method as the decorators are added after instantiating the object.
 
 ```python
 example_obj = TPC.profile_class_methods(ExampleClass())
