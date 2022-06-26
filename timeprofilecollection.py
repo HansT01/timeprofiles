@@ -1,19 +1,19 @@
-from functools import wraps
 import inspect
-from time import perf_counter
-from typing import Any, Dict, Callable, List, Tuple
-from matplotlib import pyplot as plt
 import numpy as np
-import numpy.typing as npt
+from matplotlib import pyplot as plt
+from functools import wraps
+from time import perf_counter
+from typing import Any, Dict, Callable
 from tabulate import tabulate
 from operator import itemgetter
 
+from timeprofile import TimeProfile
 
-class TimeProfiler:
+
+class TimeProfileCollection:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
 
-    profiles: Dict[Callable, List[Tuple[float, float]]] = {}
-    profiles_arr: Dict[Callable, npt.NDArray] = None
+    profiles: Dict[Callable, type[TimeProfile]] = {}
 
     ORDER_BY_NAME = 0
     ORDER_BY_CALLS = 1
@@ -24,7 +24,7 @@ class TimeProfiler:
     @staticmethod
     def reset():
         """Resets all profiles."""
-        TimeProfiler.profiles = {}
+        TimeProfileCollection.profiles = {}
 
     @staticmethod
     def profile_method(f):
@@ -32,17 +32,14 @@ class TimeProfiler:
 
         @wraps(f)
         def wrapper(*args, **kwargs):
-            profiles = TimeProfiler.profiles
+            profiles = TimeProfileCollection.profiles
             if f not in profiles:
-                profiles[f] = []
+                profiles[f] = TimeProfile()
 
-            # List used over tuples to guarantee call order
-            pair = [None, None]
-            profiles[f] += [pair]
-
-            pair[0] = perf_counter()
+            start = perf_counter()
             result = f(*args, **kwargs)
-            pair[1] = perf_counter()
+            end = perf_counter()
+            profiles[f].add(start, end)
             return result
 
         return wrapper
@@ -55,7 +52,7 @@ class TimeProfiler:
         for name, method in inspect.getmembers(cls):
             if (not inspect.ismethod(method) and not inspect.isfunction(method)) or inspect.isbuiltin(method):
                 continue
-            setattr(cls, name, TimeProfiler.profile_method(method))
+            setattr(cls, name, TimeProfileCollection.profile_method(method))
         return cls
 
     @staticmethod
@@ -67,32 +64,21 @@ class TimeProfiler:
             reverse (bool, optional): Reverse row order? Defaults to False.
             full_name (bool, optional): Display full name of methods? Defaults to False.
         """
-        TimeProfiler.__create_arr_profiles()
-        profiles_arr = TimeProfiler.profiles_arr
+        profiles = TimeProfileCollection.profiles
         table = []
-        for key in profiles_arr:
-            arr_profile = profiles_arr[key]
-            n = len(arr_profile)
-
-            elapsed_arr = arr_profile[1] - arr_profile[0]
-            sum = np.sum(elapsed_arr)
-            longest = elapsed_arr.max()
-
-            avg = sum / n
-            bottleneck = TimeProfiler.__calculate_bottleneck(arr_profile)
-
+        for key in profiles:
+            profile = profiles[key]
+            n = len(profile)
+            elapsed_arr = profile.get_elapsed_arr()
             row = [
                 key.__qualname__ if full_name else key.__name__,
                 n,
-                round(avg * 1000, 2),
-                round(longest * 1000, 2),
-                round(bottleneck * 1000, 2),
+                round(np.sum(elapsed_arr) / n * 1000, 2),
+                round(elapsed_arr.max() * 1000, 2),
+                round(profile.get_bottleneck() * 1000, 2),
             ]
-
             table += [row]
-
         table.sort(key=itemgetter(order_by), reverse=reverse)
-
         print(
             tabulate(
                 table,
@@ -115,84 +101,23 @@ class TimeProfiler:
             reverse (bool, optional): Reverse order? Defaults to False.
             **kwargs: ~matplotlib.patches.Polygon properties
         """
-        TimeProfiler.__create_arr_profiles()
-        earliest, latest = TimeProfiler.__get_time_range()
-        new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
-
-        # Sort by first 'start' time
-        sorted_profiles = dict(sorted(new_profiles.items(), key=lambda item: item[1], reverse=reverse))
-        TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest, **kwargs)
+        profiles = TimeProfileCollection.profiles
+        earliest, latest = TimeProfileCollection.__get_time_range()
+        sorted_profiles = {k: v for k, v in sorted(profiles.items(), key=lambda item: item[1].min(), reverse=reverse)}
+        TimeProfileCollection.__plot_data(sorted_profiles, earliest, latest, **kwargs)
 
     @staticmethod
-    def __create_arr_profiles():
-        profiles = TimeProfiler.profiles
-        profiles_arr = {}
-        for key in profiles:
-            profile = profiles[key]
-            n = len(profile)
-            profiles_arr[key] = np.array([[profile[j][i] for j in range(0, n)] for i in [0, 1]])
-        TimeProfiler.profiles_arr = profiles_arr
-
-    @staticmethod
-    def __get_time_range() -> Tuple[float, float]:
-        """Returns the time range across all profiles.
-
-        Returns:
-            Tuple[float, float]: earliest time (s), latest time (s)
-        """
-        profiles_arr = TimeProfiler.profiles_arr
-        earliest = min([profiles_arr[key].min() for key in profiles_arr])
-        latest = max([profiles_arr[key].max() for key in profiles_arr])
+    def __get_time_range():
+        profiles = TimeProfileCollection.profiles
+        earliest = min([profile.min() for profile in profiles.values()])
+        latest = max([profile.max() for profile in profiles.values()])
         return earliest, latest
 
     @staticmethod
-    def __squash_profiles(earliest: float, latest: float):
-        """Prepares the profiles to be read by __plot_data.
-
-        Args:
-            earliest (float): Starting time
-            latest (float): Ending time
-
-        Returns:
-            Dict[Callable, List[Tuple[float, float]]]: Data object
-        """
-
-        profiles_arr = TimeProfiler.profiles_arr
-        new_profiles: Dict[Callable, List[Tuple[float, float]]] = {}
-        time_frame = latest - earliest
-
-        # Fill in new_profiles with normalized times
-        for key in profiles_arr:
-            arr_profile: npt.NDArray = profiles_arr[key]
-            n = arr_profile.shape[1]
-
-            new_starts = (arr_profile[0] - earliest) / time_frame
-            new_ends = (arr_profile[1] - earliest) / time_frame
-
-            new_profiles[key] = [(new_starts[i], new_ends[i]) for i in range(0, n)]
-
-        return new_profiles
-
-    @staticmethod
-    def __calculate_bottleneck(profile: npt.NDArray) -> float:
-        n = profile.shape[1]
-
-        starts = np.sort(profile[0])
-        ends = np.sort(profile[1])
-
-        bottleneck = 0
-        j = 0
-        for i in range(0, n):
-            if i == n - 1 or starts[i + 1] > ends[i]:
-                bottleneck += ends[i] - starts[j]
-                j = i + 1
-        return bottleneck
-
-    @staticmethod
     def __plot_data(
-        data: Dict[Callable, List[Tuple[float, float]]],
-        xmin: float,
-        xmax: float,
+        data: Dict[Callable, type[TimeProfile]],
+        earliest: float,
+        latest: float,
         full_name=False,
         alpha=0.4,
         fc="#000",
@@ -211,11 +136,11 @@ class TimeProfiler:
         fig, ax = plt.subplots()
         width = 1
 
-        ax.set_xlim(xmin, xmax)
+        ax.set_xlim(0, latest - earliest)
 
         for i, pair in enumerate(data.items()):
-            for value in pair[1]:
-                x0, x1 = value
+            starts_arr, ends_arr = pair[1].get_squashed_arr(earliest, latest)
+            for x0, x1 in zip(starts_arr.tolist(), ends_arr.tolist()):
                 ax.axhspan(
                     ymin=i - width / 2,
                     ymax=i + width / 2,
@@ -230,7 +155,7 @@ class TimeProfiler:
         ax.set_yticks(np.arange(0, len(data)))
         ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
 
-        ax.set_title("Time profile ranges")
+        ax.set_title("Method activity gantt chart")
         ax.set_xlabel("Time elapsed (s)")
 
         plt.tight_layout()
@@ -238,14 +163,13 @@ class TimeProfiler:
 
 
 def use_profiler(instance: Any):
-    if inspect.ismethod(instance) or inspect.isfunction(instance):
-        return TimeProfiler.profile_method(instance)
-    else:
-        try:
-            return TimeProfiler.profile_class_methods(instance)
-        except:
-            print("Could not identify instance")
-            return instance
+    try:
+        if inspect.ismethod(instance) or inspect.isfunction(instance):
+            return TimeProfileCollection.profile_method(instance)
+        return TimeProfileCollection.profile_class_methods(instance)
+    except:
+        print("Could not identify instance")
+        return instance
 
 
 if __name__ == "__main__":
@@ -283,5 +207,5 @@ if __name__ == "__main__":
     example1 = ExampleClass()
     example1.method_a(5)
 
-    TimeProfiler.display_profiles(TimeProfiler.ORDER_BY_NAME)
-    TimeProfiler.plot_profiles()
+    TimeProfileCollection.display_profiles(TimeProfileCollection.ORDER_BY_NAME)
+    TimeProfileCollection.plot_profiles()
