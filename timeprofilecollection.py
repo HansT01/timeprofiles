@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from functools import wraps
 from time import perf_counter
-from typing import Any, Dict, Callable
 from tabulate import tabulate
 from operator import itemgetter
 
@@ -13,7 +12,7 @@ from timeprofile import TimeProfile
 class TimeProfileCollection:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
 
-    profiles: Dict[Callable, type[TimeProfile]] = {}
+    profiles: dict[function, type[TimeProfile]] = {}
 
     @staticmethod
     def reset():
@@ -120,7 +119,7 @@ class TimeProfileCollection:
 
     @staticmethod
     def __plot_data(
-        data: Dict[Callable, type[TimeProfile]],
+        data: dict[function, type[TimeProfile]],
         earliest: float,
         latest: float,
         full_name=False,

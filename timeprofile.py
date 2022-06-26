@@ -1,10 +1,9 @@
-from typing import Any, Dict, List, Tuple
 import numpy as np
 import numpy.typing as npt
 
 
 class TimeProfile:
-    def __init__(self, starts: List[float] = None, ends: List[float] = None):
+    def __init__(self, starts: list[float] = None, ends: list[float] = None):
         if (bool(starts) != bool(ends)) or (starts and ends and len(starts) != len(ends)):
             raise Exception("Input lists do not have the same length")
 
@@ -15,18 +14,23 @@ class TimeProfile:
         self.__ends_arr = None
         self.__updated = False
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__starts)
 
     @property
-    def profile(self):
+    def profile(self) -> tuple[list[float], list[float]]:
         return self.__starts, self.__ends
 
     @property
-    def profile_arr(self):
+    def profile_arr(self) -> tuple[npt.NDArray, npt.NDArray]:
         if not self.__updated:
             self.__update_arr()
         return self.__starts_arr, self.__ends_arr
+
+    def __update_arr(self):
+        self.__starts_arr = np.array(self.__starts)
+        self.__ends_arr = np.array(self.__ends)
+        self.__updated = True
 
     def add(self, start: float, end: float):
         self.__starts += [start]
@@ -44,11 +48,6 @@ class TimeProfile:
     def max(self) -> float:
         return self.profile_arr[1].max()
 
-    def __update_arr(self):
-        self.__starts_arr = np.array(self.__starts)
-        self.__ends_arr = np.array(self.__ends)
-        self.__updated = True
-
     def get_bottleneck(self) -> float:
         starts_arr, ends_arr = self.profile_arr
         n = len(starts_arr)
@@ -63,7 +62,7 @@ class TimeProfile:
                 j = i + 1
         return bottleneck
 
-    def get_squashed_arr(self, min: float, max: float):
+    def get_squashed_arr(self, min: float, max: float) -> tuple[npt.NDArray, npt.NDArray]:
         starts_arr, ends_arr = self.profile_arr
         time_frame = max - min
         new_starts: npt.NDArray = (starts_arr - min) / time_frame
