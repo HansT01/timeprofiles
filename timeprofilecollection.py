@@ -12,7 +12,7 @@ from timeprofile import TimeProfile
 class TimeProfileCollection:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
 
-    profiles: dict[function, type[TimeProfile]] = {}
+    profiles: dict[callable, type[TimeProfile]] = {}
 
     @staticmethod
     def reset():
@@ -119,7 +119,7 @@ class TimeProfileCollection:
 
     @staticmethod
     def __plot_data(
-        data: dict[function, type[TimeProfile]],
+        data: dict[callable, type[TimeProfile]],
         earliest: float,
         latest: float,
         full_name=False,
