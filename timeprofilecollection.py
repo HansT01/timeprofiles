@@ -1,4 +1,5 @@
 import inspect
+from typing import Callable
 import numpy as np
 from matplotlib import pyplot as plt
 from functools import wraps
@@ -12,12 +13,19 @@ from timeprofile import TimeProfile
 class TimeProfileCollection:
     """TimeProfiler is a class for quickly storing the time taken for each method to complete, and displaying it as an easy-to-read table."""
 
-    profiles: dict[callable, type[TimeProfile]] = {}
+    profiles: dict[Callable, type[TimeProfile]] = {}
 
     @staticmethod
-    def reset():
-        """Resets all profiles."""
-        TimeProfileCollection.profiles = {}
+    def add(f: Callable, start: float, end: float):
+        profiles = TimeProfileCollection.profiles
+        if f not in profiles:
+            profiles[f] = TimeProfile()
+        profiles[f].add(start, end)
+
+    @staticmethod
+    def clear():
+        """Clears all profiles."""
+        TimeProfileCollection.profiles.clear()
 
     @staticmethod
     def profile_method(f):
@@ -25,14 +33,10 @@ class TimeProfileCollection:
 
         @wraps(f)
         def wrapper(*args, **kwargs):
-            profiles = TimeProfileCollection.profiles
-            if f not in profiles:
-                profiles[f] = TimeProfile()
-
             start = perf_counter()
             result = f(*args, **kwargs)
             end = perf_counter()
-            profiles[f].add(start, end)
+            TimeProfileCollection.add(f, start, end)
             return result
 
         return wrapper
@@ -43,9 +47,13 @@ class TimeProfileCollection:
 
         # https://stackoverflow.com/a/57368193
         for name, method in inspect.getmembers(cls):
-            if (not inspect.ismethod(method) and not inspect.isfunction(method)) or inspect.isbuiltin(method):
+            if inspect.isbuiltin(method):
                 continue
-            setattr(cls, name, TimeProfileCollection.profile_method(method))
+            if inspect.ismethod(method) or inspect.isfunction(method):
+                setattr(cls, name, TimeProfileCollection.profile_method(method))
+            if inspect.isclass(method):
+                if name != "__class__":
+                    setattr(cls, name, TimeProfileCollection.profile_class_methods(method))
         return cls
 
     ORDER_BY_NAME = 0
@@ -119,7 +127,7 @@ class TimeProfileCollection:
 
     @staticmethod
     def __plot_data(
-        data: dict[callable, type[TimeProfile]],
+        data: dict[Callable, type[TimeProfile]],
         earliest: float,
         latest: float,
         full_name=False,
@@ -187,18 +195,18 @@ if __name__ == "__main__":
             self.method_d()
 
         def method_b(self):
-            sleep(randint(0, 10000) / 10000)
+            sleep(randint(0, 100) / 1000)
             self.method_c()
 
         def method_c(self):
-            sleep(randint(0, 10000) / 10000)
+            sleep(randint(0, 100) / 1000)
 
         def method_d(self):
-            sleep(randint(0, 10000) / 10000)
+            sleep(randint(0, 100) / 1000)
 
         @staticmethod
         def method_e():
-            sleep(randint(0, 10000) / 10000)
+            sleep(randint(0, 100) / 1000)
 
     example1 = ExampleClass()
     example1.method_a(5)
