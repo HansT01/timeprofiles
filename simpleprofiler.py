@@ -53,9 +53,7 @@ class TimeProfiler:
 
         # https://stackoverflow.com/a/57368193
         for name, method in inspect.getmembers(cls):
-            if (
-                not inspect.ismethod(method) and not inspect.isfunction(method)
-            ) or inspect.isbuiltin(method):
+            if (not inspect.ismethod(method) and not inspect.isfunction(method)) or inspect.isbuiltin(method):
                 continue
             setattr(cls, name, TimeProfiler.profile_method(method))
         return cls
@@ -122,9 +120,7 @@ class TimeProfiler:
         new_profiles = TimeProfiler.__squash_profiles(earliest, latest)
 
         # Sort by first 'start' time
-        sorted_profiles = dict(
-            sorted(new_profiles.items(), key=lambda item: item[1], reverse=reverse)
-        )
+        sorted_profiles = dict(sorted(new_profiles.items(), key=lambda item: item[1], reverse=reverse))
         TimeProfiler.__plot_data(sorted_profiles, 0, latest - earliest, **kwargs)
 
     @staticmethod
@@ -134,9 +130,7 @@ class TimeProfiler:
         for key in profiles:
             profile = profiles[key]
             n = len(profile)
-            profiles_arr[key] = np.array(
-                [[profile[j][i] for j in range(0, n)] for i in [0, 1]]
-            )
+            profiles_arr[key] = np.array([[profile[j][i] for j in range(0, n)] for i in [0, 1]])
         TimeProfiler.profiles_arr = profiles_arr
 
     @staticmethod
@@ -234,9 +228,7 @@ class TimeProfiler:
                 )
 
         ax.set_yticks(np.arange(0, len(data)))
-        ax.set_yticklabels(
-            [key.__qualname__ if full_name else key.__name__ for key in data.keys()]
-        )
+        ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
 
         ax.set_title("Time profile ranges")
         ax.set_xlabel("Time elapsed (s)")
