@@ -64,6 +64,6 @@ example_obj = TPC.profile_class_methods(ExampleClass())
 After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** static methods can be called to visualize the time profiles.
 
 ```
-TPC.display_profiles(order_by=TimeProfiler.ORDER_BY_AVERAGE, reverse=False, full_name=True)
+TPC.display_profiles(order_by=TPC.ORDER_BY_AVERAGE, reverse=False, full_name=True)
 TPC.plot_profiles(fc="yellow", ec="black")
 ```
