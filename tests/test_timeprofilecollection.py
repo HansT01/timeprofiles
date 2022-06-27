@@ -1,12 +1,8 @@
 import unittest
 from unittest.mock import patch
-
 from tabulate import tabulate
-from timeprofile import TimeProfile
-from timeprofilecollection import TimeProfileCollection as TPC
 
-# Hide traceback
-__unittest = True
+from timeprofiles import TimeProfileCollection as TPC
 
 
 class TestTimeProfileCollection(unittest.TestCase):

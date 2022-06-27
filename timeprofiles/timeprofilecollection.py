@@ -7,7 +7,7 @@ from time import perf_counter
 from tabulate import tabulate
 from operator import itemgetter
 
-from timeprofile import TimeProfile
+from timeprofiles.timeprofile import TimeProfile
 
 
 class TimeProfileCollection:

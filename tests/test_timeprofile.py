@@ -1,7 +1,7 @@
 import unittest
-
 import numpy as np
-from timeprofile import TimeProfile
+
+from timeprofiles import TimeProfile
 
 
 class TestTimeProfile(unittest.TestCase):
