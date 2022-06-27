@@ -4,7 +4,7 @@ This library is designed to assist in quickly debugging bottlenecks in both sing
 
 It contains a class called **TimeProfileCollection** for easily storing the time taken for each method to complete, and displaying it as either a table or a gantt chart. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling individual methods.
 
-```
+```python
 @TimeProfileCollection.profile_class_methods
 @TimeProfileCollection.profile_method
 ```
@@ -24,11 +24,11 @@ The **plot_profiles** static method is used to plot all time profiles as ranges,
 
 ![plot_profiles example figure](/assets/images/example_fig.png)
 
-# Example usages
+## Example usages
 
 The **profile_method** decorator is applied on individual methods or functions.
 
-```
+```python
 from timeprofilecollection import TimeProfileCollection as TPC
     
 class ExampleClass:
@@ -43,7 +43,7 @@ class ExampleClass:
 
 Alternatively, the **profile_class_methods** decorator can be used to apply the **profile_method** decorator on all class methods.
 
-```
+```python
 from timeprofilecollection import TimeProfileCollection as TPC
 
 @TPC.profile_class_methods
@@ -57,13 +57,13 @@ class ExampleClass:
 
 Another way of using the profiling decorators is to apply it directly onto an object. In the following example, only the methods called from the example_object will be profiled.
 
-```
+```python
 example_obj = TPC.profile_class_methods(ExampleClass())
 ```
 
 After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** static methods can be called to visualize the time profiles.
 
-```
+```python
 TPC.display_profiles(order_by=TPC.ORDER_BY_AVERAGE, reverse=False, full_name=True)
 TPC.plot_profiles(fc="yellow", ec="black")
 ```
