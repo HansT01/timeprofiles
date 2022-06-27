@@ -22,7 +22,7 @@ method_d        1           45.95           45.95              45.95
 
 The **plot_profiles** static method is used to plot all time profiles as ranges, ordered by earliest method call.
 
-![plot_profiles example figure](/assets/images/example_fig.png)
+![plot_profiles example figure](https://raw.githubusercontent.com/HansT01/timeprofiles/main/assets/images/example_fig.png)
 
 ## Example usages
 
