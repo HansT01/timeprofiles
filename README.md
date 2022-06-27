@@ -2,6 +2,14 @@
 
 This library is designed to assist in quickly debugging bottlenecks in both single-threaded and multi-threaded operations. 
 
+## Installation
+
+```
+python -m pip install -U timeprofiles
+```
+
+## Overview
+
 It contains a class called **TimeProfileCollection** for easily storing the time taken for each method to complete, and displaying it as either a table or a gantt chart. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling individual methods.
 
 ```python
@@ -29,7 +37,7 @@ The **plot_profiles** static method is used to plot all time profiles as ranges,
 The **profile_method** decorator is applied on individual methods or functions.
 
 ```python
-from timeprofilecollection import TimeProfileCollection as TPC
+from timeprofiles import TimeProfileCollection as TPC
     
 class ExampleClass:
     @TPC.profile_method
@@ -44,7 +52,7 @@ class ExampleClass:
 Alternatively, the **profile_class_methods** decorator can be used to apply the **profile_method** decorator on all class methods.
 
 ```python
-from timeprofilecollection import TimeProfileCollection as TPC
+from timeprofiles import TimeProfileCollection as TPC
 
 @TPC.profile_class_methods
 class ExampleClass:
