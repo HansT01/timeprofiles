@@ -70,30 +70,6 @@ class TimeProfile:
             self.__update_merged()
         return self.__starts_merged, self.__ends_merged
 
-    def __update_arr(self):
-        """Creates new numpy arrays from python lists."""
-        self.__starts_arr = np.array(self.__starts)
-        self.__ends_arr = np.array(self.__ends)
-        self.__updated_arr = True
-
-    def __update_merged(self):
-        starts, ends = self.profile
-
-        n = len(self)
-        starts_sorted = sorted(starts)
-        ends_sorted = sorted(ends)
-
-        self.__starts_merged.clear()
-        self.__ends_merged.clear()
-
-        j = 0
-        for i in range(0, n):
-            if i == n - 1 or starts_sorted[i + 1] > ends_sorted[i]:
-                self.__starts_merged += [starts_sorted[j]]
-                self.__ends_merged += [ends_sorted[i]]
-                j = i + 1
-        self.__updated_merged = True
-
     def add(self, start: float, end: float):
         """Adds new start and end times to profile."""
         if end < start:
@@ -125,6 +101,31 @@ class TimeProfile:
             float: Maximum time value.
         """
         return self.profile_arr[1].max()
+
+    def __update_arr(self):
+        """Creates new numpy arrays from python lists."""
+        self.__starts_arr = np.array(self.__starts)
+        self.__ends_arr = np.array(self.__ends)
+        self.__updated_arr = True
+
+    def __update_merged(self):
+        """Clears and adds new profile values to merged profiles."""
+        starts, ends = self.profile
+
+        n = len(self)
+        starts_sorted = sorted(starts)
+        ends_sorted = sorted(ends)
+
+        self.__starts_merged.clear()
+        self.__ends_merged.clear()
+
+        j = 0
+        for i in range(0, n):
+            if i == n - 1 or starts_sorted[i + 1] > ends_sorted[i]:
+                self.__starts_merged += [starts_sorted[j]]
+                self.__ends_merged += [ends_sorted[i]]
+                j = i + 1
+        self.__updated_merged = True
 
     def get_bottleneck(self) -> float:
         """Gets the bottleneck of the profile.
