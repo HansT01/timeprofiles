@@ -31,7 +31,11 @@ class TimeProfile:
 
         self.__starts_arr = None
         self.__ends_arr = None
-        self.__updated = False
+        self.__updated_arr = False
+
+        self.__starts_merged = []
+        self.__ends_merged = []
+        self.__updated_merged = False
 
     def __len__(self) -> int:
         """Gets the number of elements in the profile object."""
@@ -56,15 +60,39 @@ class TimeProfile:
         Returns:
             tuple[npt.NDArray, npt.NDArray]: Starts and ends arrays.
         """
-        if not self.__updated:
+        if not self.__updated_arr:
             self.__update_arr()
         return self.__starts_arr, self.__ends_arr
+
+    @property
+    def profile_merged(self) -> tuple[list[float], list[float]]:
+        if not self.__updated_merged:
+            self.__update_merged()
+        return self.__starts_merged, self.__ends_merged
 
     def __update_arr(self):
         """Creates new numpy arrays from python lists."""
         self.__starts_arr = np.array(self.__starts)
         self.__ends_arr = np.array(self.__ends)
-        self.__updated = True
+        self.__updated_arr = True
+
+    def __update_merged(self):
+        starts, ends = self.profile
+
+        n = len(self)
+        starts_sorted = sorted(starts)
+        ends_sorted = sorted(ends)
+
+        self.__starts_merged.clear()
+        self.__ends_merged.clear()
+
+        j = 0
+        for i in range(0, n):
+            if i == n - 1 or starts_sorted[i + 1] > ends_sorted[i]:
+                self.__starts_merged += [starts_sorted[j]]
+                self.__ends_merged += [ends_sorted[i]]
+                j = i + 1
+        self.__updated_merged = True
 
     def add(self, start: float, end: float):
         """Adds new start and end times to profile."""
@@ -72,13 +100,15 @@ class TimeProfile:
             raise Exception("End time must be after start time.")
         self.__starts += [start]
         self.__ends += [end]
-        self.__updated = False
+        self.__updated_arr = False
+        self.__updated_merged = False
 
     def clear(self):
         """Clears the current profiles from memory."""
         self.__starts = []
         self.__ends = []
-        self.__updated = False
+        self.__updated_arr = False
+        self.__updated_merged = False
 
     def min(self) -> float:
         """Gets the minimum time value in the profile.
@@ -103,18 +133,8 @@ class TimeProfile:
         Returns:
             float: Bottleneck.
         """
-        starts_arr, ends_arr = self.profile_arr
-        n = len(starts_arr)
-        starts = np.sort(starts_arr)
-        ends = np.sort(ends_arr)
-
-        bottleneck = 0
-        j = 0
-        for i in range(0, n):
-            if i == n - 1 or starts[i + 1] > ends[i]:
-                bottleneck += ends[i] - starts[j]
-                j = i + 1
-        return bottleneck
+        starts_merged, ends_merged = self.profile_merged
+        return sum([end - start for start, end in zip(starts_merged, ends_merged)])
 
     def get_squashed_arr(self, min: float, max: float) -> tuple[npt.NDArray, npt.NDArray]:
         """Gets a squashed array of this profile.
