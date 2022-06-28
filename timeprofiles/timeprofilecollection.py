@@ -80,9 +80,9 @@ class TimeProfileCollection:
             row = [
                 key.__qualname__ if full_name else key.__name__,
                 n,
-                round(np.sum(elapsed_arr) / n * 1000, 2),
-                round(elapsed_arr.max() * 1000, 2),
-                round(profile.get_bottleneck() * 1000, 2),
+                round(np.sum(elapsed_arr) / n * 1000.0, 2),
+                round(elapsed_arr.max() * 1000.0, 2),
+                round(profile.get_bottleneck() * 1000.0, 2),
             ]
             table += [row]
         table.sort(key=itemgetter(order_by), reverse=reverse)
