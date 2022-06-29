@@ -179,7 +179,7 @@ class TimeProfileCollection:
         ax.set_yticks(np.arange(0, len(data)))
         ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
 
-        ax.set_title("Method activity gantt chart")
+        ax.set_title("Method activity")
         ax.set_xlabel("Time elapsed (s)")
 
         plt.tight_layout()

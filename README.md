@@ -10,7 +10,7 @@ python -m pip install timeprofiles
 
 ## Overview
 
-It contains a class called **TimeProfileCollection** for easily storing the time taken for each method to complete, and displaying it as either a table or a gantt chart. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling individual methods.
+It contains a class called **TimeProfileCollection** for easily storing the time taken for each method to complete, and displaying it as either a table or a diagram. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling individual methods.
 
 ```python
 @TimeProfileCollection.profile_class_methods
