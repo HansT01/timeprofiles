@@ -18,6 +18,10 @@ class TestTimeProfileCollection(unittest.TestCase):
             self.assertEqual(k.__qualname__, f.__qualname__)
             self.assertEqual(1, len(tp))
 
+    def assert_no_profiles(self):
+        profiles = self.profiles
+        self.assertEqual(0, len(profiles))
+
     def test_profile_method(self):
         @TPC.profile_method
         def my_func(a, b):
@@ -144,6 +148,43 @@ class TestTimeProfileCollection(unittest.TestCase):
         TPC.profile_class_methods(obj_c)
         obj_c.my_method()
         self.assert_one_profile(MyClass.my_method)
+
+    def test_profile_ignore(self):
+        @TPC.profile_class_methods
+        class MyClass:
+            @TPC.profile_ignore
+            def __init__(self):
+                pass
+
+            def my_method(self):
+                pass
+
+            @TPC.profile_ignore
+            def my_other_method(self):
+                pass
+
+        obj = MyClass()
+        obj.my_method()
+        obj.my_other_method()
+        self.assert_one_profile(MyClass.my_method)
+
+    def test_profile_ignore_subclass(self):
+        @TPC.profile_class_methods
+        class MyClass:
+            @TPC.profile_ignore
+            class MySubClass:
+                def my_method(self):
+                    pass
+
+            def __init__(self):
+                pass
+
+        obj_a = MyClass.MySubClass()
+        obj_a.my_method()
+        self.assert_no_profiles()
+
+        obj_b = MyClass()
+        self.assert_one_profile(MyClass.__init__)
 
     @patch("builtins.print")
     def test_display_profiles(self, mock_print):
