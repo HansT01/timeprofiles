@@ -29,7 +29,7 @@ class TimeProfileCollection:
         TimeProfileCollection.profiles.clear()
 
     @staticmethod
-    def profile_ignore(f: Callable):
+    def profile_ignore(f):
         setattr(f, "__profile_ignore__", True)
         return f
 
