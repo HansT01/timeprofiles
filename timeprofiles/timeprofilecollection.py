@@ -29,6 +29,11 @@ class TimeProfileCollection:
         TimeProfileCollection.profiles.clear()
 
     @staticmethod
+    def profile_ignore(f: Callable):
+        setattr(f, "__profile_ignore__", True)
+        return f
+
+    @staticmethod
     def profile_method(f: Callable):
         """Method decorator that adds the decorated method to the list of time profiles."""
 
@@ -50,6 +55,8 @@ class TimeProfileCollection:
 
         # https://stackoverflow.com/a/57368193
         for name, method in inspect.getmembers(cls):
+            if hasattr(method, "__profile_ignore__"):
+                continue
             if inspect.isbuiltin(method):
                 continue
             if inspect.ismethod(method) or inspect.isfunction(method):
@@ -123,9 +130,11 @@ class TimeProfileCollection:
         Returns:
             tuple[float, float]: earliest and latest times in seconds
         """
-        profiles = TimeProfileCollection.profiles
-        earliest = min([profile.min() for profile in profiles.values()])
-        latest = max([profile.max() for profile in profiles.values()])
+        values = TimeProfileCollection.profiles.values()
+        if not values:
+            return 0, 1
+        earliest = min([profile.min() for profile in values])
+        latest = max([profile.max() for profile in values])
         return earliest, latest
 
     @staticmethod
