@@ -34,7 +34,6 @@ class TimeProfileCollection:
 
         @wraps(f)
         def wrapper(*args, **kwargs):
-            print(inspect.stack())
             start = perf_counter()
             try:
                 result = f(*args, **kwargs)
