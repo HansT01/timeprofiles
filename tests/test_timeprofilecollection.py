@@ -10,21 +10,43 @@ class TestTimeProfileCollection(unittest.TestCase):
         TPC.clear()
         self.profiles = TPC.profiles
 
+    def assert_one_profile(self, f):
+        profiles = self.profiles
+        self.assertEqual(1, len(profiles))
+        for k in profiles:
+            tp = profiles[k]
+            self.assertEqual(k.__qualname__, f.__qualname__)
+            self.assertEqual(1, len(tp))
+
     def test_profile_method(self):
         @TPC.profile_method
         def my_func(a, b):
             return a + b
 
-        my_func(1, 2)
-        my_func(1, 2)
         a = my_func(1, 2)
+        b = my_func(2, 3)
+        c = my_func(3, 4)
         self.assertEqual(3, a)
+        self.assertEqual(5, b)
+        self.assertEqual(7, c)
 
         for k in self.profiles:
             self.assertEqual(k.__qualname__, my_func.__qualname__)
 
             tp = self.profiles[k]
             self.assertEqual(3, len(tp))
+
+    def test_profile_exception(self):
+        @TPC.profile_method
+        def my_func():
+            raise Exception()
+
+        try:
+            my_func()
+        except:
+            pass
+
+        self.assert_one_profile(my_func)
 
     def test_profile_class_methods(self):
         @TPC.profile_class_methods
@@ -154,14 +176,6 @@ class TestTimeProfileCollection(unittest.TestCase):
         )
         TPC.display_profiles()
         mock_print.assert_called_with(table_str)
-
-    def assert_one_profile(self, f):
-        profiles = self.profiles
-        self.assertEqual(1, len(profiles))
-        for k in profiles:
-            tp = profiles[k]
-            self.assertEqual(k.__qualname__, f.__qualname__)
-            self.assertEqual(1, len(tp))
 
 
 if __name__ == "__main__":
