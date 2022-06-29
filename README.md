@@ -49,7 +49,7 @@ class ExampleClass:
         # Method content
 ```
 
-Alternatively, the **profile_class_methods** decorator can be used to apply the **profile_method** decorator on all class methods.
+Alternatively, the **profile_class_methods** decorator can be used to apply the **profile_method** decorator on all class methods. This can be used in conjunction with **profile_ignore** to filter out methods you don't want to profile.
 
 ```python
 from timeprofiles import TimeProfileCollection as TPC
@@ -59,6 +59,7 @@ class ExampleClass:
     def my_method():
         # Method content
 
+    @TPC.profile_ignore
     def my_other_method():
         # Method content
 ```
@@ -74,4 +75,13 @@ After adding the decorators and calling the methods, the **display_profiles** or
 ```python
 TPC.display_profiles(order_by=TPC.ORDER_BY_AVERAGE, reverse=False, full_name=True)
 TPC.plot_profiles(fc="yellow", ec="black")
+```
+
+## Known issues
+
+Despite being able to add **profile_class_methods** to an object, **profile_ignore** cannot be used since its implementation relies on attributes, which cannot be updated on objects.
+
+```python
+# THIS WILL NOT WORK
+TPC.profile_ignore(example_obj)
 ```
