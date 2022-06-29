@@ -186,6 +186,17 @@ class TestTimeProfileCollection(unittest.TestCase):
         obj_b = MyClass()
         self.assert_one_profile(MyClass.__init__)
 
+    def test_profile_ignore_object(self):
+        class MyClass:
+            @TPC.profile_ignore
+            def my_method(self):
+                pass
+
+        obj = TPC.profile_class_methods(MyClass())
+        obj.my_method()
+
+        self.assert_no_profiles()
+
     @patch("builtins.print")
     def test_display_profiles(self, mock_print):
         def my_method():
