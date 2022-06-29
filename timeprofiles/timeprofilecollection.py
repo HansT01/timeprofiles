@@ -36,6 +36,8 @@ class TimeProfileCollection:
     @staticmethod
     def profile_method(f: Callable):
         """Method decorator that adds the decorated method to the list of time profiles."""
+        if hasattr(f, "__profile_ignore__"):
+            return f
 
         @wraps(f)
         def wrapper(*args, **kwargs):
@@ -52,18 +54,16 @@ class TimeProfileCollection:
     @staticmethod
     def profile_class_methods(cls):
         """Class decorator for adding profile_method to all contained methods within the class."""
+        if hasattr(cls, "__profile_ignore__"):
+            return cls
 
         # https://stackoverflow.com/a/57368193
         for name, method in inspect.getmembers(cls):
-            if hasattr(method, "__profile_ignore__"):
-                continue
-            if inspect.isbuiltin(method):
-                continue
+            # if inspect.isbuiltin(method):
             if inspect.ismethod(method) or inspect.isfunction(method):
                 setattr(cls, name, TimeProfileCollection.profile_method(method))
-            if inspect.isclass(method):
-                if name != "__class__":
-                    setattr(cls, name, TimeProfileCollection.profile_class_methods(method))
+            if inspect.isclass(method) and name != "__class__":
+                setattr(cls, name, TimeProfileCollection.profile_class_methods(method))
         return cls
 
     ORDER_BY_NAME = 0
