@@ -5,7 +5,7 @@ This library is designed to assist in quickly debugging bottlenecks in both sing
 ## Installation
 
 ```
-python -m pip install -U timeprofiles
+python -m pip install timeprofiles
 ```
 
 ## Overview
