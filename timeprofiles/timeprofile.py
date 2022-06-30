@@ -156,6 +156,13 @@ class TimeProfile:
         new_ends: npt.NDArray = (ends_arr - min) / time_frame
         return new_starts, new_ends
 
+    def get_squashed_merged(self, min: float, max: float) -> tuple[list[float], list[float]]:
+        starts, ends = self.profile_merged
+        time_frame = max - min
+        new_starts = [(start - min) / time_frame for start in starts]
+        new_ends = [(end - min) / time_frame for end in ends]
+        return new_starts, new_ends
+
     def get_elapsed_arr(self) -> npt.NDArray:
         """Gets the time elapsed array of this profile.
         Time elapsed is the start time subtracted from the end time.

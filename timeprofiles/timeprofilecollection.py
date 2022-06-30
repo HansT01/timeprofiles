@@ -199,34 +199,56 @@ def __plot_data(
     plt.show()
 
 
-def plot_merged(**kwargs):
+def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
     fig, ax = plt.subplots()
     width = 1
 
     earliest, latest = __get_time_range()
     ax.set_xlim(0, latest - earliest)
 
-    p = profiles
-    data = {}
-    for k in p:
-        data[k] = p[k].profile_merged
+    data = []
+    for k in profiles:
+        starts, ends = profiles[k].get_squashed_merged(earliest, latest)
+        for start, end in zip(starts, ends):
+            data += [(start, end, k)]
 
-    for i, pair in enumerate(data.items()):
-        starts_arr, ends_arr = pair[1].get_squashed_arr(earliest, latest)
-        for x0, x1 in zip(starts_arr, ends_arr):
-            ax.axhspan(
-                ymin=i - width / 2,
-                ymax=i + width / 2,
-                xmin=x0,
-                xmax=x1,
-                **kwargs,
-            )
+    data.sort()
 
-    ax.set_yticks(np.arange(0, len(data)))
+    stack = []
+
+    for d in data:
+        i = None
+        for j in range(0, len(stack) + 1):
+            if j == len(stack):
+                stack += [None]
+                i = j
+                break
+            if d[0] >= stack[j][1]:
+                i = j
+                break
+        stack[i] = d
+        ax.axhspan(
+            ymin=i - width / 2,
+            ymax=i + width / 2,
+            xmin=d[0],
+            xmax=d[1],
+            alpha=alpha,
+            fc=ColorHash(d[2]).hex,
+            ec=ec,
+            label=d[2].__qualname__ if full_name else d[2].__name__,
+            **kwargs,
+        )
+
+    ax.set_yticks(np.arange(0, len(stack)))
     # ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
 
     ax.set_title("Method activity")
     ax.set_xlabel("Time elapsed (s)")
+
+    # combine labels by key https://stackoverflow.com/a/13589144
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    plt.legend(by_label.values(), by_label.keys())
 
     plt.tight_layout()
     plt.show()
