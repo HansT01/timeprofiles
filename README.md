@@ -73,7 +73,7 @@ Another way of using the profiling decorators is to apply it directly onto an ob
 example_obj = tp.profile_class_methods(ExampleClass())
 ```
 
-After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** and **plot_merged** methods can be called to visualize the time profiles.
+After adding the decorators and calling the methods, the **display_profiles**, **plot_profiles**, or **plot_merged** methods can be called to visualize the time profiles.
 
 ```python
 tp.display_profiles(order_by=tp.ORDER_BY_AVERAGE, reverse=False, full_name=True)
