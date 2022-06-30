@@ -195,3 +195,36 @@ def __plot_data(
 
     plt.tight_layout()
     plt.show()
+
+
+def plot_merged(**kwargs):
+    fig, ax = plt.subplots()
+    width = 1
+
+    earliest, latest = __get_time_range()
+    ax.set_xlim(0, latest - earliest)
+
+    p = profiles
+    data = {}
+    for k in p:
+        data[k] = p[k].profile_merged
+
+    for i, pair in enumerate(data.items()):
+        starts_arr, ends_arr = pair[1].get_squashed_arr(earliest, latest)
+        for x0, x1 in zip(starts_arr, ends_arr):
+            ax.axhspan(
+                ymin=i - width / 2,
+                ymax=i + width / 2,
+                xmin=x0,
+                xmax=x1,
+                **kwargs,
+            )
+
+    ax.set_yticks(np.arange(0, len(data)))
+    # ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
+
+    ax.set_title("Method activity")
+    ax.set_xlabel("Time elapsed (s)")
+
+    plt.tight_layout()
+    plt.show()
