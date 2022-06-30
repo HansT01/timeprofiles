@@ -187,7 +187,7 @@ def plot_profiles(
     plt.show()
 
 
-def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
+def plot_merged(full_name=False, alpha=0.6, ec="#000", **kwargs):
     fig, ax = plt.subplots()
     width = 1
 
