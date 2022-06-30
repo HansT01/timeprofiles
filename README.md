@@ -13,8 +13,8 @@ python -m pip install timeprofiles
 It contains a class called **TimeProfileCollection** for easily storing the time taken for each method to complete, and displaying it as either a table or a diagram. The TimeProfiler class provides two static decorator methods for profiling: one for profiling the entire class, and one for profiling individual methods.
 
 ```python
-@TimeProfileCollection.profile_class_methods
-@TimeProfileCollection.profile_method
+@timeprofiles.profile_class_methods
+@timeprofiles.profile_method
 ```
 
 The **display_profiles** static method is used to display all time profiles, ordered by a specified column.
@@ -37,14 +37,14 @@ The **plot_profiles** static method is used to plot all time profiles as ranges,
 The **profile_method** decorator is applied on individual methods or functions.
 
 ```python
-from timeprofiles import TimeProfileCollection as TPC
+import timeprofiles as tp
     
 class ExampleClass:
-    @TPC.profile_method
+    @tp.profile_method
     def my_method():
         # Method content
 
-    @TPC.profile_method
+    @tp.profile_method
     def my_other_method():
         # Method content
 ```
@@ -52,14 +52,14 @@ class ExampleClass:
 Alternatively, the **profile_class_methods** decorator can be used to apply the **profile_method** decorator on all class methods. This can be used in conjunction with **profile_ignore** to filter out methods you don't want to profile.
 
 ```python
-from timeprofiles import TimeProfileCollection as TPC
+import timeprofiles as tp
 
-@TPC.profile_class_methods
+@tp.profile_class_methods
 class ExampleClass:
     def my_method():
         # Method content
 
-    @TPC.profile_ignore
+    @tp.profile_ignore
     def my_other_method():
         # Method content
 ```
@@ -67,14 +67,14 @@ class ExampleClass:
 Another way of using the profiling decorators is to apply it directly onto an object. In the following example, only the methods called from the example_object will be profiled.
 
 ```python
-example_obj = TPC.profile_class_methods(ExampleClass())
+example_obj = tp.profile_class_methods(ExampleClass())
 ```
 
 After adding the decorators and calling the methods, the **display_profiles** or the **plot_profiles** static methods can be called to visualize the time profiles.
 
 ```python
-TPC.display_profiles(order_by=TPC.ORDER_BY_AVERAGE, reverse=False, full_name=True)
-TPC.plot_profiles(fc="yellow", ec="black")
+tp.display_profiles(order_by=tp.ORDER_BY_AVERAGE, reverse=False, full_name=True)
+tp.plot_profiles()
 ```
 
 ## Known issues
@@ -83,5 +83,5 @@ Despite being able to add **profile_class_methods** to an object, **profile_igno
 
 ```python
 # THIS WILL NOT WORK
-TPC.profile_ignore(example_obj)
+tp.profile_ignore(example_obj)
 ```
