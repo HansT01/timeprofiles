@@ -12,9 +12,11 @@ from timeprofiles.timeprofile import TimeProfile
 
 
 __all__ = [
+    "profiles",
     "profile_method",
     "profile_class_methods",
     "profile_ignore",
+    "add",
     "clear",
     "print_profiles",
     "plot_profiles",

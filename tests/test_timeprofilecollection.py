@@ -2,28 +2,28 @@ import unittest
 from unittest.mock import patch
 from tabulate import tabulate
 
-from timeprofiles import TimeProfileCollection as TPC
+import timeprofiles as tp
 
 
 class TestTimeProfileCollection(unittest.TestCase):
     def setUp(self):
-        TPC.clear()
-        self.profiles = TPC.profiles
+        tp.clear()
+        self.profiles = tp.profiles
 
     def assert_one_profile(self, f):
         profiles = self.profiles
         self.assertEqual(1, len(profiles))
         for k in profiles:
-            tp = profiles[k]
+            p = profiles[k]
             self.assertEqual(k.__qualname__, f.__qualname__)
-            self.assertEqual(1, len(tp))
+            self.assertEqual(1, len(p))
 
     def assert_no_profiles(self):
         profiles = self.profiles
         self.assertEqual(0, len(profiles))
 
     def test_profile_method(self):
-        @TPC.profile_method
+        @tp.profile_method
         def my_func(a, b):
             return a + b
 
@@ -37,11 +37,11 @@ class TestTimeProfileCollection(unittest.TestCase):
         for k in self.profiles:
             self.assertEqual(k.__qualname__, my_func.__qualname__)
 
-            tp = self.profiles[k]
-            self.assertEqual(3, len(tp))
+            p = self.profiles[k]
+            self.assertEqual(3, len(p))
 
     def test_profile_exception(self):
-        @TPC.profile_method
+        @tp.profile_method
         def my_func():
             raise Exception()
 
@@ -53,7 +53,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(my_func)
 
     def test_profile_class_methods(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             def my_method(self):
                 pass
@@ -63,7 +63,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.my_method)
 
     def test_profile_init(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             def __init__(self):
                 pass
@@ -72,7 +72,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.__init__)
 
     def test_profile_repr(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             def __repr__(self):
                 return ""
@@ -82,7 +82,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.__repr__)
 
     def test_profile_str(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             def __repr__(self):
                 return ""
@@ -95,7 +95,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.__str__)
 
     def test_profile_staticmethod(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             @staticmethod
             def my_static_method():
@@ -105,7 +105,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.my_static_method)
 
     def test_profile_subclass(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             class MySubClass:
                 def my_method(self):
@@ -116,7 +116,7 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.MySubClass.my_method)
 
     def test_profile_subsubclass(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
             class MySubClass:
                 class MySubSubClass:
@@ -135,7 +135,7 @@ class TestTimeProfileCollection(unittest.TestCase):
             def my_method(self):
                 pass
 
-        obj_a = TPC.profile_class_methods(MyClass())
+        obj_a = tp.profile_class_methods(MyClass())
         obj_a.my_method()
         self.assert_one_profile(MyClass.my_method)
 
@@ -143,23 +143,23 @@ class TestTimeProfileCollection(unittest.TestCase):
         obj_b.my_method()
         self.assert_one_profile(MyClass.my_method)
 
-        TPC.clear()
+        tp.clear()
         obj_c = MyClass()
-        TPC.profile_class_methods(obj_c)
+        tp.profile_class_methods(obj_c)
         obj_c.my_method()
         self.assert_one_profile(MyClass.my_method)
 
     def test_profile_ignore(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
-            @TPC.profile_ignore
+            @tp.profile_ignore
             def __init__(self):
                 pass
 
             def my_method(self):
                 pass
 
-            @TPC.profile_ignore
+            @tp.profile_ignore
             def my_other_method(self):
                 pass
 
@@ -169,9 +169,9 @@ class TestTimeProfileCollection(unittest.TestCase):
         self.assert_one_profile(MyClass.my_method)
 
     def test_profile_ignore_subclass(self):
-        @TPC.profile_class_methods
+        @tp.profile_class_methods
         class MyClass:
-            @TPC.profile_ignore
+            @tp.profile_ignore
             class MySubClass:
                 def my_method(self):
                     pass
@@ -191,8 +191,8 @@ class TestTimeProfileCollection(unittest.TestCase):
         def my_method():
             pass
 
-        TPC.add(my_method, 0, 3)
-        TPC.add(my_method, 2, 4)
+        tp.add(my_method, 0, 3)
+        tp.add(my_method, 2, 4)
 
         table = [
             [
@@ -215,7 +215,7 @@ class TestTimeProfileCollection(unittest.TestCase):
             ],
             floatfmt=",.2f",
         )
-        TPC.display_profiles()
+        tp.print_profiles()
         mock_print.assert_called_with(table_str)
 
 
