@@ -66,6 +66,11 @@ class TimeProfile:
 
     @property
     def profile_merged(self) -> tuple[list[float], list[float]]:
+        """Gets the merged lists.
+
+        Returns:
+            tuple[list[float], list[float]]: Starts and ends lists.
+        """
         if not self.__updated_merged:
             self.__update_merged()
         return self.__starts_merged, self.__ends_merged
@@ -132,35 +137,32 @@ class TimeProfile:
         The bottleneck is the total active time, excluding overlaps.
 
         Returns:
-            float: Bottleneck.
+            float: Total bottleneck.
         """
         starts_merged, ends_merged = self.profile_merged
         return sum([end - start for start, end in zip(starts_merged, ends_merged)])
 
-    def get_squashed_arr(self, min: float, max: float) -> tuple[npt.NDArray, npt.NDArray]:
-        """Gets a squashed array of this profile.
-        The squashed array ranges from 0 to 1, as a ratio between the min and max value.
-
-        For example, a start and end time of 4 to 6, between a min and max value of 2 and 10, would become 0.25 and 0.5.
+    def get_normalized_arr(self, min: float) -> tuple[npt.NDArray, npt.NDArray]:
+        """Gets the profile arrays, relative to the input min value.
 
         Args:
-            min (float): min value of a given time frame
-            max (float): max value of a given time frame
+            min (float): The zeroth time.
 
         Returns:
-            tuple[npt.NDArray, npt.NDArray]: Starts and ends array.
+            tuple[npt.NDArray, npt.NDArray]: Starts and ends arrays.
         """
-        starts_arr, ends_arr = self.profile_arr
-        time_frame = max - min
-        new_starts: npt.NDArray = (starts_arr - min) / time_frame
-        new_ends: npt.NDArray = (ends_arr - min) / time_frame
-        return new_starts, new_ends
-
-    def get_normalized_arr(self, min: float) -> tuple[npt.NDArray, npt.NDArray]:
         starts_arr, ends_arr = self.profile_arr
         return starts_arr - min, ends_arr - min
 
-    def get_normalized_merged(self, min: float, max: float) -> tuple[list[float], list[float]]:
+    def get_normalized_merged(self, min: float) -> tuple[list[float], list[float]]:
+        """Gets the merged lists, relative to the input min value.
+
+        Args:
+            min (float): The zeroth time.
+
+        Returns:
+            tuple[list[float], list[float]]: Starts and ends lists.
+        """
         starts, ends = self.profile_merged
         new_starts = [start - min for start in starts]
         new_ends = [end - min for end in ends]

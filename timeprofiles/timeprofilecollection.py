@@ -35,6 +35,7 @@ profiles: dict[Callable, type[TimeProfile]] = {}
 
 
 def add(f: Callable, start: float, end: float):
+    """Adds a start and end time to profiles. Creates a new profile object if key does not exist."""
     if f not in profiles:
         profiles[f] = TimeProfile()
     profiles[f].add(start, end)
@@ -145,17 +146,14 @@ def plot_profiles(
     full_name=False,
     alpha=0.4,
     reverse=False,
-    fc="#000",
     ec="#000",
     **kwargs,
 ):
     """Plots the profiles as a range bar chart, ordered by first call.
 
     Args:
-        data (Dict[Callable, List[Tuple[float, float]]]): Data object
-        xmin (float): lower x limit
-        xmax (float): upper x limit
         full_name (bool, optional): Display full name of methods? Defaults to False.
+        reverse (bool, optional): Reverse order? Defaults to False.
         **kwargs: ~matplotlib.patches.Polygon properties
     """
     fig, ax = plt.subplots()
@@ -167,7 +165,9 @@ def plot_profiles(
     for i, pair in enumerate(data.items()):
         starts_arr, ends_arr = pair[1].get_normalized_arr(earliest)
         for x0, x1 in zip(starts_arr, ends_arr):
-            ax.add_patch(Rectangle((x0, i - width / 2), x1 - x0, width, alpha=alpha, fc=ColorHash(pair[0]).hex, ec=ec))
+            ax.add_patch(
+                Rectangle((x0, i - width / 2), x1 - x0, width, alpha=alpha, fc=ColorHash(pair[0]).hex, ec=ec, **kwargs)
+            )
 
     ax.set_ylim(-0.5, len(data) - 0.5)
     ax.set_xlim(0, latest - earliest)
@@ -188,6 +188,13 @@ def plot_profiles(
 
 
 def plot_merged(full_name=False, alpha=0.6, ec="#000", **kwargs):
+    """Plots the profiles as a range bar chart, ordered by first call.
+
+    Args:
+        full_name (bool, optional): Display full name of methods? Defaults to False.
+        reverse (bool, optional): Reverse order? Defaults to False.
+        **kwargs: ~matplotlib.patches.Polygon properties
+    """
     fig, ax = plt.subplots()
     width = 1
 
@@ -221,6 +228,7 @@ def plot_merged(full_name=False, alpha=0.6, ec="#000", **kwargs):
                 fc=ColorHash(d[2]).hex,
                 ec=ec,
                 label=d[2].__qualname__ if full_name else d[2].__name__,
+                **kwargs,
             )
         )
 
