@@ -20,7 +20,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     py_modules=find_packages(),
-    install_requires=["numpy", "matplotlib", "tabulate"],
+    install_requires=["numpy", "matplotlib", "tabulate", "colorhash"],
     keywords=["python", "time", "profile", "class", "method"],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

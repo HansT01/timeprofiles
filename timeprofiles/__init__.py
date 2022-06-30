@@ -1,2 +1,1 @@
-from timeprofiles.timeprofile import TimeProfile
-from timeprofiles.timeprofilecollection import TimeProfileCollection
+from timeprofiles.timeprofilecollection import *
