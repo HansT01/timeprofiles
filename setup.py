@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = "\n" + fh.read()
 
 VERSION = "0.0.5"
-DESCRIPTION = "Easily profile time taken for methods to complete."
+DESCRIPTION = "Easily profile time taken for methods to complete. "
 
 # Setting up
 setup(
