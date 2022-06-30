@@ -206,7 +206,7 @@ def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
     earliest, latest = __get_time_range()
     ax.set_xlim(0, latest - earliest)
 
-    data = []
+    data: list[tuple[float, float, Callable]] = []
     for k in profiles:
         starts, ends = profiles[k].get_squashed_merged(earliest, latest)
         for start, end in zip(starts, ends):
