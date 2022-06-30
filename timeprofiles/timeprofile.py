@@ -156,11 +156,14 @@ class TimeProfile:
         new_ends: npt.NDArray = (ends_arr - min) / time_frame
         return new_starts, new_ends
 
-    def get_squashed_merged(self, min: float, max: float) -> tuple[list[float], list[float]]:
+    def get_normalized_arr(self, min: float) -> tuple[npt.NDArray, npt.NDArray]:
+        starts_arr, ends_arr = self.profile_arr
+        return starts_arr - min, ends_arr - min
+
+    def get_normalized_merged(self, min: float, max: float) -> tuple[list[float], list[float]]:
         starts, ends = self.profile_merged
-        time_frame = max - min
-        new_starts = [(start - min) / time_frame for start in starts]
-        new_ends = [(end - min) / time_frame for end in ends]
+        new_starts = [start - min for start in starts]
+        new_ends = [end - min for end in ends]
         return new_starts, new_ends
 
     def get_elapsed_arr(self) -> npt.NDArray:

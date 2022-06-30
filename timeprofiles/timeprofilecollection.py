@@ -1,6 +1,7 @@
 import inspect
 from typing import Callable
 from colorhash import ColorHash
+from matplotlib.patches import Rectangle
 import numpy as np
 from matplotlib import pyplot as plt
 from functools import wraps
@@ -9,6 +10,7 @@ from tabulate import tabulate
 from operator import itemgetter
 
 from timeprofiles.timeprofile import TimeProfile
+from timeprofiles.zoompan import ZoomPan
 
 
 __all__ = [
@@ -125,18 +127,6 @@ def print_profiles(order_by=0, reverse=False, full_name=False):
     )
 
 
-def plot_profiles(reverse=False, **kwargs):
-    """Plots the profiles as a range bar chart, ordered by first call.
-
-    Args:
-        reverse (bool, optional): Reverse order? Defaults to False.
-        **kwargs: ~matplotlib.patches.Polygon properties
-    """
-    earliest, latest = __get_time_range()
-    sorted_profiles = {k: v for k, v in sorted(profiles.items(), key=lambda item: item[1].min(), reverse=reverse)}
-    __plot_data(sorted_profiles, earliest, latest, **kwargs)
-
-
 def __get_time_range() -> tuple[float, float]:
     """Gets the earliest and latest times for current profiles.
 
@@ -151,17 +141,15 @@ def __get_time_range() -> tuple[float, float]:
     return earliest, latest
 
 
-def __plot_data(
-    data: dict[Callable, type[TimeProfile]],
-    earliest: float,
-    latest: float,
+def plot_profiles(
     full_name=False,
     alpha=0.4,
+    reverse=False,
     fc="#000",
     ec="#000",
     **kwargs,
 ):
-    """Plots the data using the matplotlib library.
+    """Plots the profiles as a range bar chart, ordered by first call.
 
     Args:
         data (Dict[Callable, List[Tuple[float, float]]]): Data object
@@ -173,27 +161,27 @@ def __plot_data(
     fig, ax = plt.subplots()
     width = 1
 
-    ax.set_xlim(0, latest - earliest)
+    earliest, latest = __get_time_range()
+    data = {k: v for k, v in sorted(profiles.items(), key=lambda item: item[1].min(), reverse=reverse)}
 
     for i, pair in enumerate(data.items()):
-        starts_arr, ends_arr = pair[1].get_squashed_arr(earliest, latest)
+        starts_arr, ends_arr = pair[1].get_normalized_arr(earliest)
         for x0, x1 in zip(starts_arr, ends_arr):
-            ax.axhspan(
-                ymin=i - width / 2,
-                ymax=i + width / 2,
-                xmin=x0,
-                xmax=x1,
-                alpha=alpha,
-                fc=ColorHash(pair[0]).hex,
-                ec=ec,
-                **kwargs,
-            )
+            ax.add_patch(Rectangle((x0, i - width / 2), x1 - x0, width, alpha=alpha, fc=ColorHash(pair[0]).hex, ec=ec))
+
+    ax.set_ylim(-0.5, len(data) - 0.5)
+    ax.set_xlim(0, latest - earliest)
 
     ax.set_yticks(np.arange(0, len(data)))
     ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
 
     ax.set_title("Method activity")
     ax.set_xlabel("Time elapsed (s)")
+
+    # Add zoom and pan events
+    zp = ZoomPan()
+    zp.zoom_factory(ax)
+    zp.pan_factory(ax)
 
     plt.tight_layout()
     plt.show()
@@ -204,18 +192,15 @@ def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
     width = 1
 
     earliest, latest = __get_time_range()
-    ax.set_xlim(0, latest - earliest)
 
     data: list[tuple[float, float, Callable]] = []
     for k in profiles:
-        starts, ends = profiles[k].get_squashed_merged(earliest, latest)
+        starts, ends = profiles[k].get_normalized_merged(earliest, latest)
         for start, end in zip(starts, ends):
             data += [(start, end, k)]
 
     data.sort()
-
     stack = []
-
     for d in data:
         i = None
         for j in range(0, len(stack) + 1):
@@ -227,20 +212,22 @@ def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
                 i = j
                 break
         stack[i] = d
-        ax.axhspan(
-            ymin=i - width / 2,
-            ymax=i + width / 2,
-            xmin=d[0],
-            xmax=d[1],
-            alpha=alpha,
-            fc=ColorHash(d[2]).hex,
-            ec=ec,
-            label=d[2].__qualname__ if full_name else d[2].__name__,
-            **kwargs,
+        ax.add_patch(
+            Rectangle(
+                (d[0], i),
+                d[1] - d[0],
+                width,
+                alpha=alpha,
+                fc=ColorHash(d[2]).hex,
+                ec=ec,
+                label=d[2].__qualname__ if full_name else d[2].__name__,
+            )
         )
 
-    ax.set_yticks(np.arange(0, len(stack)))
-    # ax.set_yticklabels([key.__qualname__ if full_name else key.__name__ for key in data.keys()])
+    ax.set_ylim(0, len(stack))
+    ax.set_xlim(0, latest - earliest)
+
+    ax.set_yticks(np.arange(0, len(stack) + 1))
 
     ax.set_title("Method activity")
     ax.set_xlabel("Time elapsed (s)")
@@ -249,6 +236,11 @@ def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
     plt.legend(by_label.values(), by_label.keys())
+
+    # Add zoom and pan events
+    zp = ZoomPan()
+    zp.zoom_factory(ax)
+    zp.pan_factory(ax)
 
     plt.tight_layout()
     plt.show()
