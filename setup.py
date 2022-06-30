@@ -6,7 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open("README.md", "r") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = "0.0.2"
+VERSION = "0.0.4"
 DESCRIPTION = "Easily profile time taken for methods to complete."
 
 # Setting up
