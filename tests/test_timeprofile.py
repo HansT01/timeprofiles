@@ -105,21 +105,23 @@ class TestTimeProfile(unittest.TestCase):
         bn = self.tp.get_bottleneck()
         self.assertEqual(6, bn)
 
-    def test_get_squashed_arr(self):
-        self.tp.add(0, 3)
-        self.tp.add(1, 4)
+    def test_get_normalized_arr(self):
+        self.tp.add(1, 3)
+        self.tp.add(2, 4)
 
-        starts_arr, ends_arr = self.tp.get_squashed_arr(0, 4)
+        starts_arr, ends_arr = self.tp.get_normalized_arr(1)
         self.assertEqual(0, starts_arr[0])
-        self.assertEqual(0.75, ends_arr[0])
-        self.assertEqual(0.25, starts_arr[1])
-        self.assertEqual(1, ends_arr[1])
+        self.assertEqual(2, ends_arr[0])
+        self.assertEqual(1, starts_arr[1])
+        self.assertEqual(3, ends_arr[1])
 
-        starts_arr, ends_arr = self.tp.get_squashed_arr(2, 4)
-        self.assertEqual(-1, starts_arr[0])
-        self.assertEqual(0.5, ends_arr[0])
-        self.assertEqual(-0.5, starts_arr[1])
-        self.assertEqual(1, ends_arr[1])
+    def test_get_normalized_merged(self):
+        self.tp.add(1, 3)
+        self.tp.add(2, 4)
+
+        starts_arr, ends_arr = self.tp.get_normalized_merged(1)
+        self.assertEqual(0, starts_arr[0])
+        self.assertEqual(3, ends_arr[0])
 
     def test_get_elapsed_arr(self):
         self.tp.add(0, 3)
