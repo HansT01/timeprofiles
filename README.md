@@ -22,11 +22,11 @@ The **display_profiles** method is used to display all time profiles, ordered by
 ```
 Name        Calls    Average (ms)    Longest (ms)    Bottleneck (ms)
 --------  -------  --------------  --------------  -----------------
-method_a        1          209.75          209.75             209.75
-method_b        5          100.54          144.18             144.66
-method_c        5           59.21           93.50             125.10
-method_d        1           62.82           62.82              62.82
-method_e        1           46.85           46.85              46.85
+method_a        1          203.50          203.50             203.50
+method_b        5          104.82          155.19             155.40
+method_c        5           58.86           78.35             140.00
+method_d        1           45.83           45.83              45.83
+method_e        1           93.76           93.76              93.76
 ```
 
 The **plot_profiles** and **plot_merged** methods are used to plot all time profiles as ranges, ordered by earliest method call.
