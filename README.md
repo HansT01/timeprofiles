@@ -33,7 +33,7 @@ The **plot_profiles** and **plot_merged** methods are used to plot all time prof
 
 ![plot_profiles example figure](https://raw.githubusercontent.com/HansT01/timeprofiles/main/assets/images/example_fig.png)
 
-![plot_profiles example figure](https://raw.githubusercontent.com/HansT01/timeprofiles/main/assets/images/example_fig_merged.png)
+![plot_merged example figure](https://raw.githubusercontent.com/HansT01/timeprofiles/main/assets/images/example_fig_merged.png)
 
 ## Example usages
 
