@@ -229,7 +229,7 @@ def plot_merged(full_name=False, alpha=0.4, ec="#000", **kwargs):
 
     ax.set_yticks(np.arange(0, len(stack) + 1))
 
-    ax.set_title("Method activity")
+    ax.set_title("Method activity (merged)")
     ax.set_xlabel("Time elapsed (s)")
 
     # combine labels by key https://stackoverflow.com/a/13589144
