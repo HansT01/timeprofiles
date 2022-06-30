@@ -202,7 +202,7 @@ def plot_merged(full_name=False, alpha=0.6, ec="#000", **kwargs):
 
     data: list[tuple[float, float, Callable]] = []
     for k in profiles:
-        starts, ends = profiles[k].get_normalized_merged(earliest, latest)
+        starts, ends = profiles[k].get_normalized_merged(earliest)
         for start, end in zip(starts, ends):
             data += [(start, end, k)]
 
