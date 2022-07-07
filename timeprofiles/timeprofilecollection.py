@@ -36,6 +36,7 @@ profiles: dict[Callable, type[TimeProfile]] = {}
 
 def add(f: Callable, start: float, end: float):
     """Adds a start and end time to profiles. Creates a new profile object if key does not exist."""
+
     if f not in profiles:
         profiles[f] = TimeProfile()
     profiles[f].add(start, end)
@@ -43,6 +44,7 @@ def add(f: Callable, start: float, end: float):
 
 def clear():
     """Clears all profiles."""
+
     profiles.clear()
 
 
@@ -53,6 +55,7 @@ def profile_ignore(f):
 
 def profile_method(f: Callable):
     """Method decorator that adds the decorated method to the list of time profiles."""
+
     if hasattr(f, "__profile_ignore__"):
         return f
 
@@ -71,6 +74,7 @@ def profile_method(f: Callable):
 
 def profile_class_methods(cls):
     """Class decorator for adding profile_method to all contained methods within the class."""
+
     if hasattr(cls, "__profile_ignore__"):
         return cls
 
@@ -92,13 +96,9 @@ ORDER_BY_BOTTLENECK = 4
 
 
 def print_profiles(order_by=0, reverse=False, full_name=False):
-    """Prints out all profiles to console as a table, ordered by the order_by parameter.
+    """Prints out all profiles to console as a table with the method name, or optionally the full name,
+    ordered by the order_by parameter. Use the provided ORDER_BY_ fields for the order_by parameter."""
 
-    Args:
-        order_by (int, optional): Optional ordering using provided ORDER_BY_ fields. Defaults to ORDER_BY_NAME.
-        reverse (bool, optional): Reverse row order? Defaults to False.
-        full_name (bool, optional): Display full name of methods? Defaults to False.
-    """
     table = []
     for key in profiles:
         profile = profiles[key]
@@ -129,11 +129,8 @@ def print_profiles(order_by=0, reverse=False, full_name=False):
 
 
 def __get_time_range() -> tuple[float, float]:
-    """Gets the earliest and latest times for current profiles.
+    """Gets the earliest and latest times for current profiles."""
 
-    Returns:
-        tuple[float, float]: earliest and latest times in seconds
-    """
     values = profiles.values()
     if not values:
         return 0, 1
@@ -149,13 +146,9 @@ def plot_profiles(
     ec="#000",
     **kwargs,
 ):
-    """Plots the profiles as a range bar chart, ordered by first call.
+    """Plots the profiles as a range bar chart with the method name, or optionally the full name, ordered by first call.
+    Extra kwargs will be passed into the matplotlib's Rectangle object."""
 
-    Args:
-        full_name (bool, optional): Display full name of methods? Defaults to False.
-        reverse (bool, optional): Reverse order? Defaults to False.
-        **kwargs: ~matplotlib.patches.Polygon properties
-    """
     fig, ax = plt.subplots()
     width = 1
 
@@ -188,13 +181,9 @@ def plot_profiles(
 
 
 def plot_merged(full_name=False, alpha=0.6, ec="#000", **kwargs):
-    """Plots the profiles as a range bar chart, ordered by first call.
+    """Plots the profiles as a range bar chart with the method name, or optionally the full name, ordered by first call.
+    Extra kwargs will be passed into the matplotlib's Rectangle object."""
 
-    Args:
-        full_name (bool, optional): Display full name of methods? Defaults to False.
-        reverse (bool, optional): Reverse order? Defaults to False.
-        **kwargs: ~matplotlib.patches.Polygon properties
-    """
     fig, ax = plt.subplots()
     width = 1
 
